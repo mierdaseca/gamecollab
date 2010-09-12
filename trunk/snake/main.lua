@@ -23,9 +23,9 @@ function love.load()
 	gfx.image:setFilter("nearest", "nearest")
 	gfx.scale = 2
 	gfx.tile = 16
-	gfx.x = 2 * gfx.tile
+	gfx.x = 2 * gfx.tile - (gfx.tile/2)
 	gfx.y = 2 * gfx.tile
-	gfx.sprites = spriteSheet(gfx.tile, gfx.image)
+	gfx.sprites = spriteSheet(gfx.image, gfx.tile)
 	gfx.width = love.graphics.getWidth()
 	gfx.height = love.graphics.getHeight()
 
@@ -48,6 +48,7 @@ function love.load()
 	game.height = 12
 	
 	initSnake()
+	initBorder()
 end
 
 function love.update(dt)
@@ -58,7 +59,7 @@ function love.draw()
 	drawGround()
 	drawSnake()
 	drawTile(spr.fruit, 10, 5)
-	drawBlocks()
+	drawBorder()
 end
 
 function love.keypressed(key)
@@ -140,7 +141,6 @@ function drawGround()
 	local i, j
 	
 	-- Draw ground
-	
 	drawTile(spr.floor2, 1, 1)
 	
 	for i=2, game.width do
@@ -154,35 +154,64 @@ function drawGround()
 			drawTile(spr.floor, i, j)
 		end
 	end
-	
 end
 
-function drawBlocks()
+function initBorder()
+	local img = gfx.image
+	local w, h = img:getWidth(), img:getHeight()
+	local t = gfx.tile
+	
+	leaves = {}
+	
+	leaves.NW = { img, love.graphics.newQuad(0, 3*t, 32, 32, w, h) }
+	leaves.N  = { img, love.graphics.newQuad(2*t, 3*t, 16, 32, w, h) }
+	leaves.NE = { img, love.graphics.newQuad(3*t, 3*t, 32, 32, w, h) }
+	
+	leaves.W1 = { img, love.graphics.newQuad(0, 5*t, 32, 16, w, h) }
+	leaves.W2  = { img, love.graphics.newQuad(0, 6*t, 32, 16, w, h) }
+	leaves.W3 = { img, love.graphics.newQuad(0, 7*t, 32, 16, w, h) }
+	
+	leaves.E1 = { img, love.graphics.newQuad(3*t, 5*t, 32, 16, w, h) }
+	leaves.E2  = { img, love.graphics.newQuad(3*t, 6*t, 32, 16, w, h) }
+	leaves.E3 = { img, love.graphics.newQuad(3*t, 7*t, 32, 16, w, h) }
+	
+	leaves.SW = { img, love.graphics.newQuad(0, 8*t, 32, 32, w, h) }
+	leaves.S  = { img, love.graphics.newQuad(2*t, 8*t, 16, 32, w, h) }
+	leaves.SE = { img, love.graphics.newQuad(3*t, 8*t, 32, 32, w, h) }
+end
+
+function drawBorder()
 	local i, j
 	local w, h = game.width, game.height
-
-	-- Draw walls
+	local g = gfx.sprites
 	
-	--[[
-	drawTile(spr.tree1, 0, 0)
-	for i=0, w do
-		drawTile(spr.tree2, i, 0)
+	-- Draw north wall
+	drawTile(leaves.NW, -1, -1)
+	drawTile(leaves.NE, w+1, -1)
+	for i=1, w do
+		drawTile(leaves.N, i, -1)
 	end
-	drawTile(spr.tree3, w+1, 0)
-	--]]
 	
-	--[[
-	for i=0, game.width+1 do
-		drawTile(spr.block, i, 0)
-		drawTile(spr.block, i, game.height+1)
+	-- Draw west wall
+	drawTile(leaves.W1, -1, 1)
+	drawTile(leaves.W3, -1, h)
+	for i=1, h-1 do
+		drawTile(leaves.W2, -1, i)
 	end
-
-	for j=0, game.height+1 do
-		drawTile(spr.block, 0, j)
-		drawTile(spr.block, game.width+1, j)
+	
+	-- Draw east wall
+	drawTile(leaves.E1, w+1, 1)
+	drawTile(leaves.E3, w+1, h)
+	for i=1, h-1 do
+		drawTile(leaves.E2, w+1, i)
 	end
-	--]]
-
+	
+	-- Draw south wall
+	drawTile(leaves.SW, -1, h+1)
+	drawTile(leaves.SE, w+1, h+1)
+	for i=1, w do
+		drawTile(leaves.S, i, h+1)
+	end
 end
 
 -- ******************
@@ -197,18 +226,20 @@ function drawSprite(sprite,x,y)
 	love.graphics.drawq(sprite[1], sprite[2], (x+gfx.x)*gfx.scale, (y+gfx.y)*gfx.scale, 0.0, gfx.scale, gfx.scale)
 end
 
-function spriteSheet(t,i)
+function spriteSheet(img,t)
 	local i, j
 	local tab = {}
-	local w, h = i:getWidth(), i:getHeight()
+	local w, h = img:getWidth(), img:getHeight()
 	local x, y = (w/t), (h/t)	
 	
 	for i=1, x do
 		tab[i] = {}
 		for j=1, y do
-			tab[i][j] = { i, love.graphics.newQuad((i-1)*t, (j-1)*t, t, t, w, h) }
+			tab[i][j] = { img, love.graphics.newQuad((i-1)*t, (j-1)*t, t, t, w, h) }
 		end
 	end
 
 	return tab
 end
+
+
