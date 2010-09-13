@@ -37,11 +37,6 @@ function love.load()
 	spr.floor2= gfx.sprites[2][2]
 	spr.floor3= gfx.sprites[3][2]
 	spr.fruit = gfx.sprites[4][3]
-
-	spr.tree1 = gfx.sprites[2][5]
-	spr.tree2 = gfx.sprites[3][5]
-	spr.tree3 = gfx.sprites[4][5]
-	spr.tree4 = gfx.sprites[4][6]
 	
 	game = {}
 	game.width = 20
@@ -176,28 +171,28 @@ function drawBorder()
 	local w, h = game.width, game.height
 	local g = gfx.sprites
 	
-	-- Draw north wall
+	-- Draw north border
 	drawTile(leaves.NW, -1, -1)
 	drawTile(leaves.NE, w+1, -1)
 	for i=1, w do
 		drawTile(leaves.N, i, -1)
 	end
 	
-	-- Draw west wall
+	-- Draw west border
 	drawTile(leaves.W1, -1, 1)
 	drawTile(leaves.W3, -1, h)
 	for i=1, h-1 do
 		drawTile(leaves.W2, -1, i)
 	end
 	
-	-- Draw east wall
+	-- Draw east border
 	drawTile(leaves.E1, w+1, 1)
 	drawTile(leaves.E3, w+1, h)
 	for i=1, h-1 do
 		drawTile(leaves.E2, w+1, i)
 	end
 	
-	-- Draw south wall
+	-- Draw south border
 	drawTile(leaves.SW, -1, h+1)
 	drawTile(leaves.SE, w+1, h+1)
 	for i=1, w do
