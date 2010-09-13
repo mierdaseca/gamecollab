@@ -87,7 +87,7 @@ function updateSnake(dt)
 	if love.keyboard.isDown("left") then turnSnake(-1,0)
 	elseif love.keyboard.isDown("right") then turnSnake(1,0)
 	elseif love.keyboard.isDown("up") then turnSnake(0,-1)
-	elseif love.keyboard.isDown("down") then turnSnake(0,-1) end
+	elseif love.keyboard.isDown("down") then turnSnake(0,1) end
 	
 	-- Move the snake
 	if s.time <= 0.0 then
