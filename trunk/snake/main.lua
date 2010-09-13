@@ -16,7 +16,7 @@
 -- ******
 
 function love.load()
-	love.graphics.setBackgroundColor(23,12,0)
+	love.graphics.setBackgroundColor(23, 12, 0)
 
 	gfx = {}
 	gfx.image = love.graphics.newImage("snake.png")
@@ -89,15 +89,10 @@ function updateSnake(dt)
 	local s = snake
 	
 	-- Snake input
-	if love.keyboard.isDown("left") then
-		turnSnake(-1,0)
-	elseif love.keyboard.isDown("right") then
-		turnSnake(1,0)
-	elseif love.keyboard.isDown("up") then
-		turnSnake(0,-1)
-	elseif love.keyboard.isDown("down") then
-		turnSnake(0,1)
-	end
+	if love.keyboard.isDown("left") then turnSnake(-1,0)
+	elseif love.keyboard.isDown("right") then turnSnake(1,0)
+	elseif love.keyboard.isDown("up") then turnSnake(0,-1)
+	elseif love.keyboard.isDown("down") then turnSnake(0,-1) end
 	
 	-- Move the snake
 	if s.time <= 0.0 then
@@ -139,17 +134,13 @@ end
 
 function drawGround()
 	local i, j
+	local w, h = game.width, game.height
 	
 	-- Draw ground
 	drawTile(spr.floor2, 1, 1)
-	
-	for i=2, game.width do
-		drawTile(spr.floor3, i, 1)
-	end
-	for j=2, game.height do
-		drawTile(spr.floor1, 1, j)
-	end
-	for i=2, game.width do
+	for i=2, w do drawTile(spr.floor3, i, 1) end
+	for j=2, h do drawTile(spr.floor1, 1, j) end
+	for i=2, w do
 		for j=2, game.height do
 			drawTile(spr.floor, i, j)
 		end
@@ -241,5 +232,3 @@ function spriteSheet(img,t)
 
 	return tab
 end
-
-
