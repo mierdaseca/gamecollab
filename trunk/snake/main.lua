@@ -134,16 +134,10 @@ function updateSnake(dt)
 		-- Wall collision
 		local w, h = game.width, game.height
 		
-		if s.x < 1 then
-			s.x = 1
-		elseif s.x >= w then
-			s.x = w
-		end
-		if s.y < 1 then
-			s.y = 1
-		elseif s.y >= h then
-			s.y = h
-		end		
+		if s.x < 1	then		s.x = 1
+		elseif s.x >= w then	s.x = w
+		elseif s.y < 1	then	s.y = 1
+		elseif s.y >= h then	s.y = h end		
 		
 		-- Self collision
 		local i=1
