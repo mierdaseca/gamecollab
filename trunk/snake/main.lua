@@ -16,8 +16,14 @@
 -- ******
 
 function love.load()
-	love.graphics.setBackgroundColor(23, 12, 0)
-
+	
+	--require("proAudioRt")
+	--proAudio.create(16,44100,1024)
+	--sample = proAudio.sampleFromFile("snake/snake_battle.mp3")
+	--if sample then bgm = proAudio.soundLoop(sample) end
+	
+	love.graphics.setBackgroundColor(33, 21, 0)
+	
 	gfx = {}
 	gfx.image = love.graphics.newImage("snake.png")
 	gfx.image:setFilter("nearest", "nearest")
@@ -42,6 +48,8 @@ function love.load()
 	game.width = 20
 	game.height = 12
 	
+	--initScoreHandler()
+	initFruit()
 	initSnake()
 	initBorder()
 end
@@ -53,13 +61,13 @@ end
 function love.draw()
 	drawGround()
 	drawSnake()
-	drawTile(spr.fruit, 10, 5)
+	drawFruit()
 	drawBorder()
 end
 
 function love.keypressed(key)
 	if key == "escape" or key == "q" then
-		love.event.push("q")
+		gameOver()
 	elseif key == "r" then
 		love.filesystem.load("main.lua")()
 		love.load()
@@ -67,31 +75,59 @@ function love.keypressed(key)
 end
 
 -- *******
+--  score
+-- *******
+
+function gameOver()
+	love.event.push("q")	
+end
+
+--function initScoreHandler()
+--	scoreHandler = {}
+--	scoreHandler.level = 1
+--	scoreHandler.snakeSpeed[1] = 0.25
+--end
+
+-- *******
 --  snake
 -- *******
 
 function initSnake()
 	snake = {}
+	
+	-- Bumped these in front of possible inserts
 	snake.x = 0
 	snake.y = 0
 	snake.vx = 1
 	snake.vy = 0
 	snake.time = 0.0
-	snake.speed = 0.25
+	snake.speed = 0.15
+	
+	-- Ensure snake[i].x/y is not empty
+	local body = {}
+	body.x = 0
+	body.y = 0
+	table.insert(snake, body)
 end
 
 function updateSnake(dt)
 	local s = snake
 	
 	-- Snake input
-	if love.keyboard.isDown("left") then turnSnake(-1,0)
-	elseif love.keyboard.isDown("right") then turnSnake(1,0)
-	elseif love.keyboard.isDown("up") then turnSnake(0,-1)
-	elseif love.keyboard.isDown("down") then turnSnake(0,1) end
+	if love.keyboard.isDown("left") and s.vx ~= 1 then turnSnake(-1,0)
+	elseif love.keyboard.isDown("right") and s.vx ~= -1 then turnSnake(1,0)
+	elseif love.keyboard.isDown("up") and s.vy ~= 1 then turnSnake(0,-1)
+	elseif love.keyboard.isDown("down") and s.vy ~= -1 then turnSnake(0,1) end
 	
 	-- Move the snake
 	if s.time <= 0.0 then
 		s.time = s.speed
+		
+		local body = {}
+		body.x = s.x
+		body.y = s.y
+		table.insert(snake, body)
+
 		s.x = s.x + s.vx
 		s.y = s.y + s.vy
 
@@ -107,7 +143,25 @@ function updateSnake(dt)
 			s.y = 1
 		elseif s.y >= h then
 			s.y = h
+		end		
+		
+		-- Self collision
+		local i=1
+		repeat
+			-- Body collision check
+			if s.x == s[i].x and s.y == s[i].y then
+				gameOver()
+			end
+			i=i+1
+		until i==table.getn(s)
+		
+		-- Fruit collision
+		if s.x == fruit.x and s.y == fruit.y then
+			newFruit()
+		else
+			table.remove(snake, 1)
 		end
+			
 	else
 		s.time = s.time - dt
 	end
@@ -120,6 +174,9 @@ end
 
 function drawSnake(x,y)
 	local s = snake
+	for i=1, table.getn(s) do
+		drawTile(spr.snake, s[i].x, s[i].y)
+	end
 	drawTile(spr.snake, s.x, s.y)
 end
 
@@ -200,30 +257,71 @@ function drawBorder()
 	end
 end
 
+-- *****
+-- Fruit
+-- *****
+
+function initFruit()
+	fruit = {}
+	
+	-- Random seed
+	math.randomseed( os.time() )
+	math.random()
+	
+	fruit.x = math.random(1, game.width-1)
+	fruit.y = math.random(1, game.height-1)
+end
+
+function newFruit()
+	local s = snake
+	local f = fruit
+	
+	-- Random seed
+	math.randomseed( os.time() )
+	math.random()
+	
+	-- Ensure fruit spawns in empty space
+	local loop = true
+	while loop do
+		loop = false
+		
+		f.x = math.random(1, game.width-1)
+		f.y = math.random(1, game.height-1)
+		
+		for i=1, table.getn(s) do
+			if (f.x == s[i].x and f.y == s[i].y) or (f.x == s.x and f.y == s.y) then loop = true break end
+		end
+	end
+end
+
+function drawFruit()
+	drawTile(spr.fruit, fruit.x, fruit.y)
+end
+
 -- ******************
 --  helper functions
 -- ******************
 
-function drawTile(spr,x,y)
-	drawSprite(spr, x*gfx.tile, y*gfx.tile)
+function drawTile(sprite,x,y)
+	drawSprite(sprite, x*gfx.tile, y*gfx.tile)
 end
 
 function drawSprite(sprite,x,y)
 	love.graphics.drawq(sprite[1], sprite[2], (x+gfx.x)*gfx.scale, (y+gfx.y)*gfx.scale, 0.0, gfx.scale, gfx.scale)
 end
 
-function spriteSheet(img,t)
+function spriteSheet(img,tile)
 	local i, j
-	local tab = {}
+	local t = {}
 	local w, h = img:getWidth(), img:getHeight()
-	local x, y = (w/t), (h/t)	
+	local x, y = (w/tile), (h/tile)	
 	
 	for i=1, x do
-		tab[i] = {}
+		t[i] = {}
 		for j=1, y do
-			tab[i][j] = { img, love.graphics.newQuad((i-1)*t, (j-1)*t, t, t, w, h) }
+			t[i][j] = { img, love.graphics.newQuad((i-1)*tile, (j-1)*tile, tile, tile, w, h) }
 		end
 	end
 
-	return tab
+	return t
 end
