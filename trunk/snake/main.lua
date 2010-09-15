@@ -248,14 +248,10 @@ function drawGround()
 			n = snakeTouch(x, y-1)
 			w = snakeTouch(x-1,y)
 			
-			if nw and not n and not w then
-				drawTile(gfx.sprites[3][5], x, y)
-			elseif w and n then
-				drawTile(gfx.sprites[1][5], x, y)
-			elseif w then
-				drawTile(gfx.sprites[1][6], x, y)
-			elseif n then
-				drawTile(gfx.sprites[2][5], x, y)
+			if nw and not n and not w then	drawTile(gfx.sprites[3][5], x, y)
+			elseif w and n then				drawTile(gfx.sprites[1][5], x, y)
+			elseif w then						drawTile(gfx.sprites[1][6], x, y)
+			elseif n then						drawTile(gfx.sprites[2][5], x, y)
 			else
 				-- Regular tile
 				drawTile(spr.floor, x, y)
