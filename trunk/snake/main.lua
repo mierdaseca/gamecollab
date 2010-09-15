@@ -37,7 +37,7 @@ function love.load()
 	gfx.scale = 2
 	gfx.tile = 16
 	gfx.x = 2 * gfx.tile - (gfx.tile/2)
-	gfx.y = 3 * gfx.tile
+	gfx.y = 3 * gfx.tile + (gfx.tile/2)
 	gfx.sprites = spriteSheet(gfx.image, gfx.tile)
 	gfx.width = love.graphics.getWidth()
 	gfx.height = love.graphics.getHeight()
@@ -49,7 +49,7 @@ function love.load()
 	spr.snakeN= gfx.sprites[4][1]
 	spr.snakeS= gfx.sprites[5][1]
 	spr.fruit = gfx.sprites[4][3]
-	spr.floor = gfx.sprites[3][4]
+	spr.floor = gfx.sprites[2][4]
 	spr.floor1= gfx.sprites[1][4] 
 	spr.floor2= gfx.sprites[1][3]
 	spr.floor3= gfx.sprites[2][3]
@@ -101,7 +101,7 @@ function initHud()
 end
 
 function drawHud()
-	love.graphics.drawq(gfx.image, hud.sprTitle, gfx.x + 8, 8, 0.0, gfx.scale, gfx.scale)
+	love.graphics.drawq(gfx.image, hud.sprTitle, gfx.x + 8, 24, 0.0, gfx.scale, gfx.scale)
 end
 
 -- *******
@@ -197,6 +197,7 @@ function updateSnake(dt)
 		end
 			
 	else
+		-- SNAKE HEAD FACE
 		s.time = s.time - dt
 	end
 end
@@ -214,21 +215,52 @@ function drawSnake(x,y)
 	end
 end
 
+function snakeTouch(x,y)
+	local s = snake
+	local i
+	
+	-- Point inside snake? POINT INSIDE SNAKE?!
+	if x == s.x and y == s.y then return true end
+	for i=1, table.getn(s) do
+		if x == s[i].x and y == s[i].y then return true end
+	end
+	
+	return false
+end
+
 -- *****
 --  Map
 -- *****
 
 function drawGround()
-	local i, j
-	local w, h = game.width, game.height
+	local i, x, y
+	local g, nw, n, ne, e, se, s, sw, w
 	
 	-- Draw ground
 	drawTile(spr.floor2, 1, 1)
-	for i=2, w do drawTile(spr.floor3, i, 1) end
-	for j=2, h do drawTile(spr.floor1, 1, j) end
-	for i=2, w do
-		for j=2, game.height do
-			drawTile(spr.floor, i, j)
+	for i=2, game.width do drawTile(spr.floor3, i, 1) end
+	for i=2, game.height do drawTile(spr.floor1, 1, i) end
+	for x=2, game.width do
+		for y=2, game.height do
+			
+			-- Snake shadow
+			nw = snakeTouch(x-1, y-1)
+			n = snakeTouch(x, y-1)
+			w = snakeTouch(x-1,y)
+			
+			if nw and not n and not w then
+				drawTile(gfx.sprites[3][5], x, y)
+			elseif w and n then
+				drawTile(gfx.sprites[1][5], x, y)
+			elseif w then
+				drawTile(gfx.sprites[1][6], x, y)
+			elseif n then
+				drawTile(gfx.sprites[2][5], x, y)
+			else
+				-- Regular tile
+				drawTile(spr.floor, x, y)
+			end
+			
 		end
 	end
 end
@@ -354,6 +386,7 @@ function spriteSheet(img,tile)
 	local w, h = img:getWidth(), img:getHeight()
 	local x, y = (w/tile), (h/tile)	
 	
+	-- HEAD FACE SNAKE
 	for i=1, x do
 		t[i] = {}
 		for j=1, y do
