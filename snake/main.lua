@@ -126,8 +126,8 @@ function initSnake()
 	snake = {}
 	
 	-- Put these variables in front of the bodies
-	snake.x = 0
-	snake.y = 0
+	snake.x = 1
+	snake.y = 1
 	snake.vx = 1
 	snake.vy = 0
 	snake.pvx = 1  -- previous snake velocity
@@ -139,8 +139,8 @@ function initSnake()
 	
 	-- Ensure snake[i].x/y is not empty
 	local body = {}
-	body.x = 0
-	body.y = 0
+	body.x = snake.x
+	body.y = snake.y
 	table.insert(snake, body)
 end
 
@@ -175,11 +175,10 @@ function updateSnake(dt)
 		elseif s.vy == 1 then	s.head = spr.snakeS end
 
 		-- Wall collision
-		local w, h = game.width, game.height
-		if s.x < 1	then		s.x = 1
-		elseif s.x >= w then	s.x = w
-		elseif s.y < 1	then	s.y = 1
-		elseif s.y >= h then	s.y = h end		
+		local w, h = 1+game.width, 1+game.height
+		if s.x < 1	or s.x >= w or s.y < 1	or s.y >= h then
+			gameOver()
+		end		
 		
 		-- Self collision
 		local i=1
