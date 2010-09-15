@@ -95,7 +95,7 @@ end
 function initSnake()
 	snake = {}
 	
-	-- Bumped these in front of possible inserts
+	-- Put 'static' in front of bodies
 	snake.x = 0
 	snake.y = 0
 	snake.vx = 1
@@ -119,10 +119,11 @@ function updateSnake(dt)
 	elseif love.keyboard.isDown("up") and s.vy ~= 1 then turnSnake(0,-1)
 	elseif love.keyboard.isDown("down") and s.vy ~= -1 then turnSnake(0,1) end
 	
-	-- Move the snake
+	-- Can move?
 	if s.time <= 0.0 then
 		s.time = s.speed
 		
+		-- Move the snake
 		local body = {}
 		body.x = s.x
 		body.y = s.y
