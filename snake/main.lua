@@ -11,8 +11,15 @@
 -- different to how arrays are iterated in C:
 -- "for( i=0; i<10; i++ )" range of 0 to 9
 
+-- TODO:
+--
+--   + The graphics
+--   + The video game
+--   + Coffee
+--
+
 -- ******
---  love
+--  Love
 -- ******
 
 function love.load()
@@ -30,19 +37,22 @@ function love.load()
 	gfx.scale = 2
 	gfx.tile = 16
 	gfx.x = 2 * gfx.tile - (gfx.tile/2)
-	gfx.y = 2 * gfx.tile
+	gfx.y = 3 * gfx.tile
 	gfx.sprites = spriteSheet(gfx.image, gfx.tile)
 	gfx.width = love.graphics.getWidth()
 	gfx.height = love.graphics.getHeight()
 
 	spr = {}
-	spr.snake = gfx.sprites[1][2]
-	spr.block = gfx.sprites[1][3]
-	spr.floor = gfx.sprites[3][3]
-	spr.floor1= gfx.sprites[2][3] 
-	spr.floor2= gfx.sprites[2][2]
-	spr.floor3= gfx.sprites[3][2]
+	spr.snake = gfx.sprites[1][1]
+	spr.snakeW= gfx.sprites[2][1]
+	spr.snakeE= gfx.sprites[3][1]
+	spr.snakeN= gfx.sprites[4][1]
+	spr.snakeS= gfx.sprites[5][1]
 	spr.fruit = gfx.sprites[4][3]
+	spr.floor = gfx.sprites[3][4]
+	spr.floor1= gfx.sprites[1][4] 
+	spr.floor2= gfx.sprites[1][3]
+	spr.floor3= gfx.sprites[2][3]
 	
 	game = {}
 	game.width = 20
@@ -52,6 +62,7 @@ function love.load()
 	initFruit()
 	initSnake()
 	initBorder()
+	initHud()
 end
 
 function love.update(dt)
@@ -63,6 +74,7 @@ function love.draw()
 	drawSnake()
 	drawFruit()
 	drawBorder()
+	drawHud()
 end
 
 function love.keypressed(key)
@@ -74,8 +86,26 @@ function love.keypressed(key)
 	end
 end
 
+
+-- *****
+--  Hud
+-- *****
+
+function initHud()
+	local img = gfx.image
+	local t = gfx.tile
+
+	hud = {}
+	
+	hud.sprTitle = love.graphics.newQuad(5*t, 7*t, 80, 32, img:getWidth(), img:getHeight())
+end
+
+function drawHud()
+	love.graphics.drawq(gfx.image, hud.sprTitle, gfx.x + 8, 8, 0.0, gfx.scale, gfx.scale)
+end
+
 -- *******
---  score
+--  Score
 -- *******
 
 function gameOver()
@@ -89,19 +119,23 @@ end
 --end
 
 -- *******
---  snake
+--  Snake
 -- *******
 
 function initSnake()
 	snake = {}
 	
-	-- Put 'static' in front of bodies
+	-- Put these variables in front of the bodies
 	snake.x = 0
 	snake.y = 0
 	snake.vx = 1
 	snake.vy = 0
+	snake.pvx = 1  -- previous snake velocity
+	snake.pvy = 0
 	snake.time = 0.0
 	snake.speed = 0.15
+	snake.body = spr.snake
+	snake.head = spr.snakeE
 	
 	-- Ensure snake[i].x/y is not empty
 	local body = {}
@@ -114,10 +148,10 @@ function updateSnake(dt)
 	local s = snake
 	
 	-- Snake input
-	if love.keyboard.isDown("left") and s.vx ~= 1 then turnSnake(-1,0)
-	elseif love.keyboard.isDown("right") and s.vx ~= -1 then turnSnake(1,0)
-	elseif love.keyboard.isDown("up") and s.vy ~= 1 then turnSnake(0,-1)
-	elseif love.keyboard.isDown("down") and s.vy ~= -1 then turnSnake(0,1) end
+	if love.keyboard.isDown("left") and s.pvx ~= 1 then turnSnake(-1,0)
+	elseif love.keyboard.isDown("right") and s.pvx ~= -1 then turnSnake(1,0)
+	elseif love.keyboard.isDown("up") and s.pvy ~= 1 then turnSnake(0,-1)
+	elseif love.keyboard.isDown("down") and s.pvy ~= -1 then turnSnake(0,1) end
 	
 	-- Can move?
 	if s.time <= 0.0 then
@@ -131,10 +165,17 @@ function updateSnake(dt)
 
 		s.x = s.x + s.vx
 		s.y = s.y + s.vy
+		s.pvx = s.vx
+		s.pvy = s.vy
+	
+		-- Face snake head. FACE SNAKE HEAD
+		if s.vx == -1 then		s.head = spr.snakeW
+		elseif s.vx == 1 then	s.head = spr.snakeE
+		elseif s.vy ==-1 then	s.head = spr.snakeN
+		elseif s.vy == 1 then	s.head = spr.snakeS end
 
 		-- Wall collision
 		local w, h = game.width, game.height
-		
 		if s.x < 1	then		s.x = 1
 		elseif s.x >= w then	s.x = w
 		elseif s.y < 1	then	s.y = 1
@@ -143,7 +184,6 @@ function updateSnake(dt)
 		-- Self collision
 		local i=1
 		repeat
-			-- Body collision check
 			if s.x == s[i].x and s.y == s[i].y then
 				gameOver()
 			end
@@ -169,14 +209,14 @@ end
 
 function drawSnake(x,y)
 	local s = snake
+	drawTile(s.head, s.x, s.y)
 	for i=1, table.getn(s) do
-		drawTile(spr.snake, s[i].x, s[i].y)
+		drawTile(s.body, s[i].x, s[i].y)
 	end
-	drawTile(spr.snake, s.x, s.y)
 end
 
 -- *****
---  map
+--  Map
 -- *****
 
 function drawGround()
@@ -198,24 +238,25 @@ function initBorder()
 	local img = gfx.image
 	local w, h = img:getWidth(), img:getHeight()
 	local t = gfx.tile
+	local x, y = 5, -3
 	
 	leaves = {}
 	
-	leaves.NW = { img, love.graphics.newQuad(0, 3*t, 32, 32, w, h) }
-	leaves.N  = { img, love.graphics.newQuad(2*t, 3*t, 16, 32, w, h) }
-	leaves.NE = { img, love.graphics.newQuad(3*t, 3*t, 32, 32, w, h) }
+	leaves.NW = { img, love.graphics.newQuad((x+0)*t, (y+3)*t, 32, 32, w, h) }
+	leaves.N  = { img, love.graphics.newQuad((x+2)*t, (y+3)*t, 16, 32, w, h) }
+	leaves.NE = { img, love.graphics.newQuad((x+3)*t, (y+3)*t, 32, 32, w, h) }
 	
-	leaves.W1 = { img, love.graphics.newQuad(0, 5*t, 32, 16, w, h) }
-	leaves.W2  = { img, love.graphics.newQuad(0, 6*t, 32, 16, w, h) }
-	leaves.W3 = { img, love.graphics.newQuad(0, 7*t, 32, 16, w, h) }
+	leaves.W1 = { img, love.graphics.newQuad((x+0)*t, (y+5)*t, 32, 16, w, h) }
+	leaves.W2  ={ img, love.graphics.newQuad((x+0)*t, (y+6)*t, 32, 16, w, h) }
+	leaves.W3 = { img, love.graphics.newQuad((x+0)*t, (y+7)*t, 32, 16, w, h) }
 	
-	leaves.E1 = { img, love.graphics.newQuad(3*t, 5*t, 32, 16, w, h) }
-	leaves.E2  = { img, love.graphics.newQuad(3*t, 6*t, 32, 16, w, h) }
-	leaves.E3 = { img, love.graphics.newQuad(3*t, 7*t, 32, 16, w, h) }
+	leaves.E1 = { img, love.graphics.newQuad((x+3)*t, (y+5)*t, 32, 16, w, h) }
+	leaves.E2  = { img, love.graphics.newQuad((x+3)*t, (y+6)*t, 32, 16, w, h) }
+	leaves.E3 = { img, love.graphics.newQuad((x+3)*t, (y+7)*t, 32, 16, w, h) }
 	
-	leaves.SW = { img, love.graphics.newQuad(0, 8*t, 32, 32, w, h) }
-	leaves.S  = { img, love.graphics.newQuad(2*t, 8*t, 16, 32, w, h) }
-	leaves.SE = { img, love.graphics.newQuad(3*t, 8*t, 32, 32, w, h) }
+	leaves.SW = { img, love.graphics.newQuad((x+0)*t, (y+8)*t, 32, 32, w, h) }
+	leaves.S  = { img, love.graphics.newQuad((x+2)*t, (y+8)*t, 16, 32, w, h) }
+	leaves.SE = { img, love.graphics.newQuad((x+3)*t, (y+8)*t, 32, 32, w, h) }
 end
 
 function drawBorder()
@@ -252,9 +293,9 @@ function drawBorder()
 	end
 end
 
--- *****
--- Fruit
--- *****
+-- *******
+--  Fruit
+-- *******
 
 function initFruit()
 	fruit = {}
@@ -284,7 +325,10 @@ function newFruit()
 		f.y = math.random(1, game.height-1)
 		
 		for i=1, table.getn(s) do
-			if (f.x == s[i].x and f.y == s[i].y) or (f.x == s.x and f.y == s.y) then loop = true break end
+			if (f.x == s[i].x and f.y == s[i].y) or (f.x == s.x and f.y == s.y) then
+				loop = true
+				break
+			end
 		end
 	end
 end
@@ -293,9 +337,9 @@ function drawFruit()
 	drawTile(spr.fruit, fruit.x, fruit.y)
 end
 
--- ******************
---  helper functions
--- ******************
+-- *********
+--  Helpers
+-- *********
 
 function drawTile(sprite,x,y)
 	drawSprite(sprite, x*gfx.tile, y*gfx.tile)
