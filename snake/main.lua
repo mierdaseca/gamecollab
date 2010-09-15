@@ -234,7 +234,7 @@ end
 
 function drawGround()
 	local i, x, y
-	local g, nw, n, ne, e, se, s, sw, w
+	local nw, n, w
 	
 	-- Draw ground
 	drawTile(spr.floor2, 1, 1)
