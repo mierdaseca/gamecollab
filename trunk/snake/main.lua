@@ -29,7 +29,7 @@ function love.load()
     --sample = proAudio.sampleFromFile("snake/snake_battle.mp3")
     --if sample then bgm = proAudio.soundLoop(sample) end
     
-    love.graphics.setBackgroundColor(31, 22, 0)
+    love.graphics.setBackgroundColor(10, 7, 0)
     
     gfx = {}
     gfx.image = love.graphics.newImage("snake.png")
@@ -110,13 +110,13 @@ end
 
 function drawHud()
     love.graphics.drawq(gfx.image, hud.spr.title, gfx.x + 8, 24, 0.0, gfx.scale, gfx.scale)
-	love.graphics.drawq(gfx.image, hud.spr.score, gfx.x + 512, 16, 0.0, gfx.scale, gfx.scale)
+	love.graphics.drawq(gfx.image, hud.spr.score, gfx.x + 672, 16, 0.0, gfx.scale, gfx.scale)
 	love.graphics.drawq(gfx.image, hud.spr.lives, gfx.x + 128 + 64, 52, 0.0, gfx.scale, gfx.scale)
 	love.graphics.drawq(gfx.image, hud.spr.level, gfx.x + 256 + 64 + 32, 16, 0.0, gfx.scale, gfx.scale)
 
 	love.graphics.printf("3", gfx.x + 256, 48, 0, "left")
 	love.graphics.printf("1", gfx.x + 256 + 128 + 4, 48, 0, "center" )
-	love.graphics.printf("100,000,000", gfx.x + 512, 48, 0, "left")
+	love.graphics.printf("100,000,000", gfx.width - 24, 48, 0, "right")
 end
 
 -- *******
