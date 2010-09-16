@@ -41,6 +41,10 @@ function love.load()
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
+	
+	font = {}
+	font = love.graphics.newImageFont("font.png", "1234567890, ")
+	love.graphics.setFont(font)
 
     spr = {}
     spr.snake = gfx.sprites[1][1]
@@ -99,10 +103,14 @@ function initHud()
     hud.spr = {}
     
     hud.spr.title = love.graphics.newQuad(5*t, 7*t, 80, 32, img:getWidth(), img:getHeight())
+	hud.spr.score = love.graphics.newQuad(5*t, 9*t, 48, 16, img:getWidth(), img:getHeight())
 end
 
 function drawHud()
     love.graphics.drawq(gfx.image, hud.spr.title, gfx.x + 8, 24, 0.0, gfx.scale, gfx.scale)
+	love.graphics.drawq(gfx.image, hud.spr.score, gfx.x + 256, 24, 0.0, gfx.scale, gfx.scale)
+
+	drawText("100,000,000", gfx.x + 512, 24)
 end
 
 -- *******
@@ -120,15 +128,15 @@ function initScoreHandler()
     
     -- Define speeds for all 9 levels
     for i=1, 9 do scoreHandler[i] = {} end
-    scoreHandler[1].snakeSpeed = 0.30
-    scoreHandler[2].snakeSpeed = 0.275
-    scoreHandler[3].snakeSpeed = 0.250
-    scoreHandler[4].snakeSpeed = 0.225
-    scoreHandler[5].snakeSpeed = 0.20
-    scoreHandler[6].snakeSpeed = 0.175
-    scoreHandler[7].snakeSpeed = 0.15
-    scoreHandler[8].snakeSpeed = 0.125
-    scoreHandler[9].snakeSpeed = 0.10
+    scoreHandler[1].snakeSpeed = 0.25
+    scoreHandler[2].snakeSpeed = 0.225
+    scoreHandler[3].snakeSpeed = 0.20
+    scoreHandler[4].snakeSpeed = 0.175
+    scoreHandler[5].snakeSpeed = 0.15
+    scoreHandler[6].snakeSpeed = 0.125
+    scoreHandler[7].snakeSpeed = 0.10
+    scoreHandler[8].snakeSpeed = 0.075
+    scoreHandler[9].snakeSpeed = 0.050
 
     -- Define score requirements for level-ups
     scoreHandler[1].level = 0
@@ -400,6 +408,10 @@ end
 -- *********
 --  Helpers
 -- *********
+
+function drawText(text, x, y)
+	love.graphics.print(text, x, y)
+end
 
 function drawTile(sprite,x,y)
     drawSprite(sprite, x*gfx.tile, y*gfx.tile)
