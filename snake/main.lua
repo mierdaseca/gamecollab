@@ -220,9 +220,9 @@ end
 function initSnake()
     snake = {}
     
-    -- Put these variables in front of the bodies
-    snake.x = 1
-    snake.y = 1
+    -- Badger badger badger badger SNAAAAKE
+    snake.x = 5
+    snake.y = 2
     snake.vx = 1
     snake.vy = 0
     snake.pvx = 1  -- previous snake velocity
@@ -232,11 +232,9 @@ function initSnake()
     snake.body = spr.snake
     snake.head = spr.snakeE
     
-    -- Ensure snake[i].x/y is not empty
-    local body = {}
-    body.x = snake.x
-    body.y = snake.y
-    table.insert(snake, body)
+    -- Populate snake with bodies
+	snakeSize(4)
+	
 end
 
 function updateSnake(dt)
@@ -335,6 +333,16 @@ function snakeTouch(x,y)
     end
     
     return false
+end
+
+function snakeSize(n)
+	local body, i
+	for i=0, n-1 do
+		body = {}
+		body.x = snake.x - (n-i)
+		body.y = snake.y
+		table.insert(snake, body)
+	end
 end
 
 -- ******************************
