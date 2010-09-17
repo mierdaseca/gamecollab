@@ -144,8 +144,7 @@ function newBlock(x, y)
 	local i
 	local b = blocks
 
-	for i=1, table.getn(b
-	) do
+	for i=1, table.getn(b) do
 		if x == b[i].x and b[i].y == y then
 			return
 		end
