@@ -1,10 +1,10 @@
--- ==============================
+-- ========================================
 --
 --     main.lua
 --
 --
 --
--- ==============================
+-- ========================================
 
 -- Don't forget that Lua arrays begin at 1!
 -- "for i=1, 10 do" is a range of 1 to 10
@@ -18,9 +18,9 @@
 --   + Coffee
 --
 
--- ******
---  Love
--- ******
+-- ******************************
+--   Love
+-- ******************************
 
 function love.load()
     
@@ -53,6 +53,7 @@ function love.load()
     spr.snakeN= gfx.sprites[4][1]
     spr.snakeS= gfx.sprites[5][1]
     spr.fruit = gfx.sprites[4][3]
+	spr.block = gfx.sprites[5][3]
     spr.floor = gfx.sprites[2][4]
     spr.floor1= gfx.sprites[1][4] 
     spr.floor2= gfx.sprites[1][3]
@@ -66,6 +67,7 @@ function love.load()
     initFruit()
     initSnake()
     initBorder()
+	initBlocks()
     initHud()
 end
 
@@ -77,6 +79,7 @@ function love.draw()
     drawGround()
     drawSnake()
     drawFruit()
+	drawBlocks()
     drawBorder()
     drawHud()
 end
@@ -91,9 +94,9 @@ function love.keypressed(key)
 end
 
 
--- *****
---  Hud
--- *****
+-- ******************************
+--   Hud
+-- ******************************
 
 function initHud()
     local img = gfx.image
@@ -119,9 +122,67 @@ function drawHud()
 	love.graphics.printf("100,000,000", gfx.width - 24, 48, 0, "right")
 end
 
--- *******
---  Score
--- *******
+-- ******************************
+--   Blocks
+-- ******************************
+
+function initBlocks()
+	blocks = {}
+	
+	newBlock(5,5)
+	newBlock(5,6)
+	newBlock(6,5)
+	newBlock(6,6)
+	
+	newBlock(6,4)
+	newBlock(6,5)
+	newBlock(7,4)
+	newBlock(7,5)
+end
+
+function newBlock(x, y)
+	local i
+	local b = blocks
+
+	for i=1, table.getn(b
+	) do
+		if x == b[i].x and b[i].y == y then
+			return
+		end
+	end
+	
+	b = {}
+	b.x = x
+	b.y = y
+
+	table.insert(blocks, b)
+end
+
+function drawBlocks()
+	local i
+	local b = blocks
+	
+	for i=1, table.getn(b) do
+		drawTile(spr.block, b[i].x, b[i].y)
+	end
+end
+
+function blockTouch(x, y)
+	local i
+    local b = blocks
+	
+    for i=1, table.getn(b) do
+        if x == b[i].x and y == b[i].y then
+			return true
+		end
+    end
+	
+    return false
+end
+
+-- ******************************
+--   Score
+-- ******************************
 
 function gameOver()
     love.event.push("q")    
@@ -157,9 +218,9 @@ function initScoreHandler()
 
 end
 
--- *******
---  Snake
--- *******
+-- ******************************
+--   Snake
+-- ******************************
 
 function initSnake()
     snake = {}
@@ -185,6 +246,7 @@ end
 
 function updateSnake(dt)
     local s = snake
+	local i
     
     -- Snake input
     if love.keyboard.isDown("left") and s.pvx ~= 1 then turnSnake(-1,0)
@@ -218,6 +280,15 @@ function updateSnake(dt)
         if s.x < 1    or s.x >= w or s.y < 1    or s.y >= h then
             gameOver()
         end        
+		
+		-- Block collision
+		local b
+		for i=1, table.getn(blocks) do
+			b = blocks[i]
+			if s.x == b.x and s.y == b.y then
+				gameOver()
+			end
+		end
         
         -- Fruit collision
         if s.x == fruit.x and s.y == fruit.y then
@@ -233,7 +304,6 @@ function updateSnake(dt)
         end
 		
 		-- Self collision
-        local i
 		for i=1, table.getn(s) do
             if s.x == s[i].x and s.y == s[i].y then
                 gameOver()
@@ -272,9 +342,9 @@ function snakeTouch(x,y)
     return false
 end
 
--- *****
---  Map
--- *****
+-- ******************************
+--   Map
+-- ******************************
 
 function drawGround()
     local i, x, y
@@ -286,24 +356,44 @@ function drawGround()
     for i=2, game.height do drawTile(spr.floor1, 1, i) end
     for x=2, game.width do
         for y=2, game.height do
-            
-            -- Snake shadow
-            nw = snakeTouch(x-1, y-1)
-            n = snakeTouch(x, y-1)
-            w = snakeTouch(x-1,y)
+	
+			-- WRONG
+			--  WAY: Funky nested if
+		
+			-- Block shadow
+			nw = blockTouch(x-1, y-1)
+            n = blockTouch(x, y-1)
+            w = blockTouch(x-1,y)
             
             if nw and not n and not w then
-				drawTile(gfx.sprites[3][5], x, y)
+				drawTile(gfx.sprites[3][3], x, y)
             elseif w and n then
-				drawTile(gfx.sprites[1][5], x, y)
+				drawTile(gfx.sprites[1][3], x, y)
             elseif w then
-				drawTile(gfx.sprites[1][6], x, y)
+				drawTile(gfx.sprites[1][4], x, y)
             elseif n then
-				drawTile(gfx.sprites[2][5], x, y)
-            else
-                drawTile(spr.floor, x, y)
-            end
+				drawTile(gfx.sprites[2][3], x, y)
+			else
+				
+				-- Snake shadow
+				nw = snakeTouch(x-1, y-1)
+				n = snakeTouch(x, y-1)
+				w = snakeTouch(x-1,y)
+				
+				if nw and not n and not w then
+					drawTile(gfx.sprites[3][5], x, y)
+				elseif w and n then
+					drawTile(gfx.sprites[1][5], x, y)
+				elseif w then
+					drawTile(gfx.sprites[1][6], x, y)
+				elseif n then
+					drawTile(gfx.sprites[2][5], x, y)
+				else
+					drawTile(spr.floor, x, y)
+				end
             
+			end
+			
         end
     end
 end
@@ -367,9 +457,9 @@ function drawBorder()
     end
 end
 
--- *******
+-- ******************************
 --  Fruit
--- *******
+-- ******************************
 
 function initFruit()
     fruit = {}
@@ -411,9 +501,9 @@ function drawFruit()
     drawTile(spr.fruit, fruit.x, fruit.y)
 end
 
--- *********
+-- ******************************
 --  Helpers
--- *********
+-- ******************************
 
 function drawTile(sprite,x,y)
     drawSprite(sprite, x*gfx.tile, y*gfx.tile)
