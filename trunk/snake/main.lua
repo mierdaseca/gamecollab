@@ -29,7 +29,7 @@ function love.load()
     --sample = proAudio.sampleFromFile("snake/snake_battle.mp3")
     --if sample then bgm = proAudio.soundLoop(sample) end
     
-    love.graphics.setBackgroundColor(10, 7, 0)
+    love.graphics.setBackgroundColor(26, 19, 0)
     
     gfx = {}
     gfx.image = love.graphics.newImage("snake.png")
