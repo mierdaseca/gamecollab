@@ -54,10 +54,6 @@ function love.load()
     spr.snakeS= gfx.sprites[5][1]
     spr.fruit = gfx.sprites[4][3]
 	spr.block = gfx.sprites[4][4]
-    spr.floor = gfx.sprites[5][3]
-    spr.floor1= gfx.sprites[1][4] 
-    spr.floor2= gfx.sprites[1][3]
-    spr.floor3= gfx.sprites[2][3]
     
     game = {}
     game.width = 20
@@ -350,9 +346,9 @@ function drawGround()
     local nw, n, w
     
     -- Draw ground
-    drawTile(spr.floor2, 1, 1)
-    for i=2, game.width do drawTile(spr.floor3, i, 1) end
-    for i=2, game.height do drawTile(spr.floor1, 1, i) end
+    drawTile(gfx.sprites[1][3], 1, 1)
+    for i=2, game.width do drawTile(gfx.sprites[2][3], i, 1) end
+    for i=2, game.height do drawTile(gfx.sprites[1][4], 1, i) end
     for x=2, game.width do
         for y=2, game.height do
 	
@@ -364,7 +360,11 @@ function drawGround()
             n = blockTouch(x, y-1)
             w = blockTouch(x-1,y)
             
-            if nw and not n and not w then
+			if not nw and n then
+				drawTile(gfx.sprites[2][4], x, y)
+			elseif not nw and w then
+				drawTile(gfx.sprites[3][4], x, y)
+            elseif nw and not n and not w then
 				drawTile(gfx.sprites[3][3], x, y)
             elseif w and n then
 				drawTile(gfx.sprites[1][3], x, y)
@@ -388,7 +388,7 @@ function drawGround()
 				elseif n then
 					drawTile(gfx.sprites[2][5], x, y)
 				else
-					drawTile(spr.floor, x, y)
+					drawTile(gfx.sprites[5][3], x, y)
 				end
             
 			end
