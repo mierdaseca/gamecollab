@@ -64,10 +64,10 @@ function love.load()
     game.height = 24
     
     initScoreHandler()
-    initFruit()
     initSnake()
-    initBorder()
 	initBlocks()
+	initFruit()
+    initBorder()
     initHud()
 end
 
@@ -88,6 +88,12 @@ end
 function love.keypressed(key)
     if key == "escape" or key == "q" then
         gameQuit()
+		
+	elseif key == "w" then gfx.y = gfx.y - gfx.tile * gfx.scale
+	elseif key == "a" then gfx.x = gfx.x - gfx.tile * gfx.scale
+	elseif key == "s" then gfx.y = gfx.y + gfx.tile * gfx.scale
+	elseif key == "d" then gfx.x = gfx.x + gfx.tile * gfx.scale
+	
     elseif key == "r" then
         love.filesystem.load("main.lua")()
         love.load()
@@ -106,7 +112,6 @@ function gameQuit()
 end
 
 function updateView(dt)
-	
 end
 
 -- ****************************************
@@ -374,8 +379,8 @@ function initFruit()
     math.randomseed( os.time() )
     math.random()
     
-    fruit.x = math.random(1, game.width-1)
-    fruit.y = math.random(1, game.height-1)
+	-- Set fruit to maximum rand. Engage.
+    newFruit()
 end
 
 function newFruit()
@@ -528,7 +533,7 @@ function drawTile(sprite,x,y)
 end
 
 function drawSprite(sprite,x,y)
-    love.graphics.drawq(sprite[1], sprite[2], (x+gfx.x)*gfx.scale, (y+gfx.y)*gfx.scale, 0.0, gfx.scale, gfx.scale)
+    love.graphics.drawq(sprite[1], sprite[2], (x-gfx.x)*gfx.scale, (y-gfx.y)*gfx.scale, 0.0, gfx.scale, gfx.scale)
 end
 
 function spriteSheet(img,tile)
