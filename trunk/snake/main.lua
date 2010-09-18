@@ -41,10 +41,10 @@ function love.load()
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
-	
-	font = {}
-	font = love.graphics.newImageFont("font.png", "1234567890, ")
-	love.graphics.setFont(font)
+    
+    font = {}
+    font = love.graphics.newImageFont("font.png", "1234567890, ")
+    love.graphics.setFont(font)
 
     spr = {}
     spr.snake = gfx.sprites[1][1]
@@ -53,37 +53,37 @@ function love.load()
     spr.snakeN= gfx.sprites[4][1]
     spr.snakeS= gfx.sprites[5][1]
     spr.fruit = gfx.sprites[4][3]
-	spr.block = gfx.sprites[4][4]
+    spr.block = gfx.sprites[4][4]
     
     game = {}
     game.width = 30
     game.height = 18
-	
-	view = {}
-	view.x = -6
-	view.y = -6
-	view.w = (gfx.width / gfx.tile) / gfx.scale
-	view.h = (gfx.height / gfx.tile) / gfx.scale
-	view.pad = 6
+    
+    view = {}
+    view.x = -6
+    view.y = -6
+    view.w = (gfx.width / gfx.tile) / gfx.scale
+    view.h = (gfx.height / gfx.tile) / gfx.scale
+    view.pad = 6
     
     initScoreHandler()
     initSnake()
-	initBlocks()
-	initFruit()
+    initBlocks()
+    initFruit()
     initBorder()
     initHud()
 end
 
 function love.update(dt)
     updateSnake(dt)
-	updateView(dt)
+    updateView(dt)
 end
 
 function love.draw()
     drawGround()
     drawSnake()
     drawFruit()
-	drawBlocks()
+    drawBlocks()
     drawBorder()
     -- drawHud()
 end
@@ -91,14 +91,6 @@ end
 function love.keypressed(key)
     if key == "escape" or key == "q" then
         gameQuit()
-		
-	-- For testing purposes only
-	-- Crazy idea: User controlled scrolling coupled with automatic scrolling?
-	elseif key == "w" then gfx.y = gfx.y - gfx.tile * gfx.scale
-	elseif key == "a" then gfx.x = gfx.x - gfx.tile * gfx.scale
-	elseif key == "s" then gfx.y = gfx.y + gfx.tile * gfx.scale
-	elseif key == "d" then gfx.x = gfx.x + gfx.tile * gfx.scale
-	
     elseif key == "r" then
         love.filesystem.load("main.lua")()
         love.load()
@@ -110,13 +102,13 @@ end
 -- ****************************************
 
 function updateView(dt)
-	local s = snake
-	local v = view
-	
-	while s.x < v.x + v.pad do v.x = v.x - 1 end
-	while s.y < v.y + v.pad do v.y = v.y - 1 end
-	while s.x > v.x + v.w - v.pad do v.x = v.x + 1 end
-	while s.y > v.y + v.h - v.pad do v.y = v.y + 1 end
+    local s = snake
+    local v = view
+    
+    while s.x < v.x + v.pad do v.x = v.x - 1 end
+    while s.y < v.y + v.pad do v.y = v.y - 1 end
+    while s.x > v.x + v.w - v.pad do v.x = v.x + 1 end
+    while s.y > v.y + v.h - v.pad do v.y = v.y + 1 end
 end
 
 function gameOver()
@@ -138,20 +130,20 @@ function initHud()
     hud.spr = {}
     
     hud.spr.title = love.graphics.newQuad(5*t, 7*t, 80, 32, img:getWidth(), img:getHeight())
-	hud.spr.score = love.graphics.newQuad(5*t, 9*t, 48, 16, img:getWidth(), img:getHeight())
-	hud.spr.lives = love.graphics.newQuad(8*t, 9*t, 32, 16, img:getWidth(), img:getHeight())
-	hud.spr.level = love.graphics.newQuad(5*t,10*t, 48, 16, img:getWidth(), img:getHeight())
+    hud.spr.score = love.graphics.newQuad(5*t, 9*t, 48, 16, img:getWidth(), img:getHeight())
+    hud.spr.lives = love.graphics.newQuad(8*t, 9*t, 32, 16, img:getWidth(), img:getHeight())
+    hud.spr.level = love.graphics.newQuad(5*t,10*t, 48, 16, img:getWidth(), img:getHeight())
 end
 
 function drawHud()
     love.graphics.drawq(gfx.image, hud.spr.title, gfx.x + 8, 24, 0.0, gfx.scale, gfx.scale)
-	love.graphics.drawq(gfx.image, hud.spr.score, gfx.x + 672, 16, 0.0, gfx.scale, gfx.scale)
-	love.graphics.drawq(gfx.image, hud.spr.lives, gfx.x + 128 + 64, 52, 0.0, gfx.scale, gfx.scale)
-	love.graphics.drawq(gfx.image, hud.spr.level, gfx.x + 256 + 64 + 32, 16, 0.0, gfx.scale, gfx.scale)
+    love.graphics.drawq(gfx.image, hud.spr.score, gfx.x + 672, 16, 0.0, gfx.scale, gfx.scale)
+    love.graphics.drawq(gfx.image, hud.spr.lives, gfx.x + 128 + 64, 52, 0.0, gfx.scale, gfx.scale)
+    love.graphics.drawq(gfx.image, hud.spr.level, gfx.x + 256 + 64 + 32, 16, 0.0, gfx.scale, gfx.scale)
 
-	love.graphics.printf("3", gfx.x + 256, 48, 0, "left")
-	love.graphics.printf("1", gfx.x + 256 + 128 + 4, 48, 0, "center" )
-	love.graphics.printf("100,000,000", gfx.width - 24, 48, 0, "right")
+    love.graphics.printf("3", gfx.x + 256, 48, 0, "left")
+    love.graphics.printf("1", gfx.x + 256 + 128 + 4, 48, 0, "center" )
+    love.graphics.printf("100,000,000", gfx.width - 24, 48, 0, "right")
 end
 
 -- ****************************************
@@ -209,13 +201,13 @@ function initSnake()
     snake.head = spr.snakeE
     
     -- Populate snake with bodies
-	snakeSize(4)
-	
+    snakeSize(4)
+    
 end
 
 function updateSnake(dt)
     local s = snake
-	local i
+    local i
     
     -- Snake input
     if love.keyboard.isDown("left") and s.pvx ~= 1 then turnSnake(-1,0)
@@ -248,11 +240,11 @@ function updateSnake(dt)
         if s.x < 1    or s.x >= w or s.y < 1 or s.y >= h then
             gameQuit()
         end        
-		
-		-- Block collision
-		if blockTouch(s.x, s.y) then
-			gameQuit()
-		end
+        
+        -- Block collision
+        if blockTouch(s.x, s.y) then
+            gameQuit()
+        end
         
         -- Fruit collision
         if s.x == fruit.x and s.y == fruit.y then
@@ -266,13 +258,13 @@ function updateSnake(dt)
         else
             table.remove(snake, 1)
         end
-		
-		-- Self collision
-		for i=1, table.getn(s) do
+        
+        -- Self collision
+        for i=1, table.getn(s) do
             if s.x == s[i].x and s.y == s[i].y then
                 gameQuit()
             end
-		end
+        end
             
     else
         s.time = s.time - dt
@@ -286,9 +278,9 @@ end
 
 function drawSnake(x,y)
     local s = snake
-	
+    
     drawTile(s.head, s.x, s.y)
-	
+    
     for i=1, table.getn(s) do
         drawTile(s.body, s[i].x, s[i].y)
     end
@@ -299,84 +291,107 @@ function snakeTouch(x,y)
     local i
     
     if x == s.x and y == s.y then
-		return true
-	end
-	
+        return true
+    end
+    
     for i=1, table.getn(s) do
         if x == s[i].x and y == s[i].y then
-			return true
-		end
+            return true
+        end
     end
     
     return false
 end
 
 function snakeSize(n)
-	local body, i
-	
-	for i=0, n-1 do
-		body = {}
-		body.x = snake.x - (n-i)
-		body.y = snake.y
-		table.insert(snake, body)
-	end
+    local body, i
+    
+    for i=0, n-1 do
+        body = {}
+        body.x = snake.x - (n-i)
+        body.y = snake.y
+        table.insert(snake, body)
+    end
 end
 
 -- ****************************************
 --   Blocks
 -- ****************************************
 
-function initBlocks()
-	blocks = {}
-	
-	newBlock(5,5)
-	newBlock(5,6)
-	newBlock(6,5)
-	newBlock(6,6)
-	
-	newBlock(6,4)
-	newBlock(6,5)
-	newBlock(7,4)
-	newBlock(7,5)
+function initBlocks()    
+    local w, h = game.width, game.height
+    local m =
+    {
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }, 
+    }
+    
+    blocks = {}
+    
+    newBlock(5,5)
+    newBlock(5,6)
+    newBlock(6,5)
+    newBlock(6,6)
+    
+    newBlock(6,4)
+    newBlock(6,5)
+    newBlock(7,4)
+    newBlock(7,5)
 end
 
 function newBlock(x, y)
-	local i
-	local b = blocks
+    local i
+    local b = blocks
 
-	-- Disallow dirty, filthy clones
-	for i=1, table.getn(b) do
-		if x == b[i].x and b[i].y == y then
-			return
-		end
-	end
-	
-	-- Create new block
-	b = {}
-	b.x = x
-	b.y = y
-	table.insert(blocks, b)
+    -- Disallow dirty, filthy clones
+    for i=1, table.getn(b) do
+        if x == b[i].x and b[i].y == y then
+            return
+        end
+    end
+    
+    -- Create new block
+    b = {}
+    b.x = x
+    b.y = y
+    table.insert(blocks, b)
 end
 
 function drawBlocks()
-	local i
-	local b = blocks
-	
-	for i=1, table.getn(b) do
-		drawTile(spr.block, b[i].x, b[i].y)
-	end
+    local i
+    local b = blocks
+    
+    for i=1, table.getn(b) do
+        drawTile(spr.block, b[i].x, b[i].y)
+    end
 end
 
 function blockTouch(x,y)
-	local i
+    local i
     local b = blocks
-	
+    
     for i=1, table.getn(b) do
         if x == b[i].x and y == b[i].y then
-			return true
-		end
+            return true
+        end
     end
-	
+    
     return false
 end
 
@@ -391,30 +406,30 @@ function initFruit()
     math.randomseed( os.time() )
     math.random()
     
-	-- Set fruit to maximum initialized state. Engage.
+    -- Set fruit to maximum initialized state. Engage.
     newFruit()
 end
 
 function newFruit()
     local s = snake
     local f = fruit
-	
+    
     -- Ensure fruit spawns in empty space
     local loop = true
     while loop do
         loop = false
         
-		-- Randomize fruit
+        -- Randomize fruit
         f.x = math.random(1, game.width-1)
         f.y = math.random(1, game.height-1)
         
-		-- Hello ladies. Look at your loop. Now back to mine. THE LOOP IS NOW SIMPLIFIED AND MORE COMPACT
+        -- Hello ladies. Look at your loop. Now back to mine. THE COLLISION CHECKING IS NOW SIMPLIFIED AND MORE COMPACT
         if snakeTouch(f.x, f.y) then
-			loop = true
-		elseif blockTouch(f.x, f.y) then
-			loop = true
-		end
-		
+            loop = true
+        elseif blockTouch(f.x, f.y) then
+            loop = true
+        end
+        
     end
 end
 
@@ -436,43 +451,43 @@ function drawGround()
     for i=2, game.height do drawTile(gfx.sprites[1][4], 1, i) end
     for x=2, game.width do
         for y=2, game.height do
-		
-			-- Block shadow
-			nw = blockTouch(x-1, y-1)
+        
+            -- Block shadow
+            nw = blockTouch(x-1, y-1)
             n = blockTouch(x, y-1)
             w = blockTouch(x-1,y)
             
-			if not nw and n then
-				drawTile(gfx.sprites[2][4], x, y)
-			elseif not nw and w then
-				drawTile(gfx.sprites[3][4], x, y)
+            if not nw and n then
+                drawTile(gfx.sprites[2][4], x, y)
+            elseif not nw and w then
+                drawTile(gfx.sprites[3][4], x, y)
             elseif nw and not n and not w then
-				drawTile(gfx.sprites[3][3], x, y)
+                drawTile(gfx.sprites[3][3], x, y)
             elseif w and n then
-				drawTile(gfx.sprites[1][3], x, y)
+                drawTile(gfx.sprites[1][3], x, y)
             elseif w then
-				drawTile(gfx.sprites[1][4], x, y)
+                drawTile(gfx.sprites[1][4], x, y)
             elseif n then
-				drawTile(gfx.sprites[2][3], x, y)
-			else
-				drawTile(gfx.sprites[5][3], x, y)
-			end
-				
-			-- Snake shadow
-			nw = snakeTouch(x-1, y-1)
-			n = snakeTouch(x, y-1)
-			w = snakeTouch(x-1,y)
-			
-			if nw and not n and not w then
-				drawTile(gfx.sprites[3][5], x, y)
-			elseif w and n then
-				drawTile(gfx.sprites[1][5], x, y)
-			elseif w then
-				drawTile(gfx.sprites[1][6], x, y)
-			elseif n then
-				drawTile(gfx.sprites[2][5], x, y)
-			end
-			
+                drawTile(gfx.sprites[2][3], x, y)
+            else
+                drawTile(gfx.sprites[5][3], x, y)
+            end
+                
+            -- Snake shadow
+            nw = snakeTouch(x-1, y-1)
+            n = snakeTouch(x, y-1)
+            w = snakeTouch(x-1,y)
+            
+            if nw and not n and not w then
+                drawTile(gfx.sprites[3][5], x, y)
+            elseif w and n then
+                drawTile(gfx.sprites[1][5], x, y)
+            elseif w then
+                drawTile(gfx.sprites[1][6], x, y)
+            elseif n then
+                drawTile(gfx.sprites[2][5], x, y)
+            end
+            
         end
     end
 end
@@ -545,8 +560,8 @@ function drawTile(sprite,x,y)
 end
 
 function drawSprite(sprite,x,y)
-	x = x - view.x * gfx.tile
-	y = y - view.y * gfx.tile
+    x = x - view.x * gfx.tile
+    y = y - view.y * gfx.tile
     love.graphics.drawq(sprite[1], sprite[2], x*gfx.scale, y*gfx.scale, 0.0, gfx.scale, gfx.scale)
 end
 
