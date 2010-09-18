@@ -89,6 +89,8 @@ function love.keypressed(key)
     if key == "escape" or key == "q" then
         gameQuit()
 		
+	-- For testing purposes only
+	-- Crazy idea: User controlled scrolling coupled with automatic scrolling?
 	elseif key == "w" then gfx.y = gfx.y - gfx.tile * gfx.scale
 	elseif key == "a" then gfx.x = gfx.x - gfx.tile * gfx.scale
 	elseif key == "s" then gfx.y = gfx.y + gfx.tile * gfx.scale
