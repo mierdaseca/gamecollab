@@ -344,12 +344,12 @@ function initBlocks()
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
     }
         
-    map_w = 30
-    map_h = 18
+    map.w = 30
+    map.h = 18
 
     local x, y
-    for x=1, map_w do
-        for y=1, map_h do
+    for x=1, map.w do
+        for y=1, map.h do
         
             if map[y][x] == 1 then  
                 newBlock(x, y)
