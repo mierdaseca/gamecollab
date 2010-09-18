@@ -94,6 +94,9 @@ end
 --   Game
 -- ****************************************
 
+function gameOver()
+end
+
 function gameQuit()
     love.event.push("q")    
 end
@@ -217,7 +220,7 @@ function updateSnake(dt)
 
         -- Wall collision
         local w, h = 1+game.width, 1+game.height
-        if s.x < 1    or s.x >= w or s.y < 1    or s.y >= h then
+        if s.x < 1    or s.x >= w or s.y < 1 or s.y >= h then
             gameQuit()
         end        
 		
@@ -247,7 +250,6 @@ function updateSnake(dt)
 		end
             
     else
-        -- SNAKE HEAD FACE
         s.time = s.time - dt
     end
 end
@@ -259,7 +261,9 @@ end
 
 function drawSnake(x,y)
     local s = snake
+	
     drawTile(s.head, s.x, s.y)
+	
     for i=1, table.getn(s) do
         drawTile(s.body, s[i].x, s[i].y)
     end
@@ -269,10 +273,14 @@ function snakeTouch(x,y)
     local s = snake
     local i
     
-    -- Point inside snake? POINT INSIDE SNAKE?!
-    if x == s.x and y == s.y then return true end
+    if x == s.x and y == s.y then
+		return true
+	end
+	
     for i=1, table.getn(s) do
-        if x == s[i].x and y == s[i].y then return true end
+        if x == s[i].x and y == s[i].y then
+			return true
+		end
     end
     
     return false
@@ -280,6 +288,7 @@ end
 
 function snakeSize(n)
 	local body, i
+	
 	for i=0, n-1 do
 		body = {}
 		body.x = snake.x - (n-i)
@@ -310,16 +319,17 @@ function newBlock(x, y)
 	local i
 	local b = blocks
 
+	-- No duping
 	for i=1, table.getn(b) do
 		if x == b[i].x and b[i].y == y then
 			return
 		end
 	end
 	
+	-- Create new block
 	b = {}
 	b.x = x
 	b.y = y
-
 	table.insert(blocks, b)
 end
 
@@ -363,11 +373,7 @@ end
 function newFruit()
     local s = snake
     local f = fruit
-    
-    -- Random seed
-    math.randomseed( os.time() )
-    math.random()
-    
+	
     -- Ensure fruit spawns in empty space
     local loop = true
     while loop do
@@ -404,9 +410,6 @@ function drawGround()
     for i=2, game.height do drawTile(gfx.sprites[1][4], 1, i) end
     for x=2, game.width do
         for y=2, game.height do
-	
-			-- WRONG
-			--  WAY: Funky nested if
 		
 			-- Block shadow
 			nw = blockTouch(x-1, y-1)
@@ -426,24 +429,22 @@ function drawGround()
             elseif n then
 				drawTile(gfx.sprites[2][3], x, y)
 			else
+				drawTile(gfx.sprites[5][3], x, y)
+			end
 				
-				-- Snake shadow
-				nw = snakeTouch(x-1, y-1)
-				n = snakeTouch(x, y-1)
-				w = snakeTouch(x-1,y)
-				
-				if nw and not n and not w then
-					drawTile(gfx.sprites[3][5], x, y)
-				elseif w and n then
-					drawTile(gfx.sprites[1][5], x, y)
-				elseif w then
-					drawTile(gfx.sprites[1][6], x, y)
-				elseif n then
-					drawTile(gfx.sprites[2][5], x, y)
-				else
-					drawTile(gfx.sprites[5][3], x, y)
-				end
-            
+			-- Snake shadow
+			nw = snakeTouch(x-1, y-1)
+			n = snakeTouch(x, y-1)
+			w = snakeTouch(x-1,y)
+			
+			if nw and not n and not w then
+				drawTile(gfx.sprites[3][5], x, y)
+			elseif w and n then
+				drawTile(gfx.sprites[1][5], x, y)
+			elseif w then
+				drawTile(gfx.sprites[1][6], x, y)
+			elseif n then
+				drawTile(gfx.sprites[2][5], x, y)
 			end
 			
         end
@@ -527,7 +528,6 @@ function spriteSheet(img,tile)
     local w, h = img:getWidth(), img:getHeight()
     local x, y = (w/tile), (h/tile)    
     
-    -- HEAD FACE SNAKE
     for i=1, x do
         t[i] = {}
         for j=1, y do
