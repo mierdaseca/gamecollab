@@ -38,10 +38,6 @@ function love.load()
     gfx.image:setFilter("nearest", "nearest")
     gfx.scale = 2
     gfx.tile = 16
-    -- gfx.x = 2 * gfx.tile - (gfx.tile/2)
-    -- gfx.y = 3 * gfx.tile + (gfx.tile/2)
-	gfx.x = 0
-    gfx.y = 0
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
@@ -60,8 +56,15 @@ function love.load()
 	spr.block = gfx.sprites[4][4]
     
     game = {}
-    game.width = 40
-    game.height = 24
+    game.width = 30
+    game.height = 18
+	
+	view = {}
+	view.x = -6
+	view.y = -6
+	view.w = (gfx.width / gfx.tile) / gfx.scale
+	view.h = (gfx.height / gfx.tile) / gfx.scale
+	view.pad = 6
     
     initScoreHandler()
     initSnake()
@@ -106,14 +109,21 @@ end
 --   Game
 -- ****************************************
 
+function updateView(dt)
+	local s = snake
+	local v = view
+	
+	while s.x < v.x + v.pad do v.x = v.x - 1 end
+	while s.y < v.y + v.pad do v.y = v.y - 1 end
+	while s.x > v.x + v.w - v.pad do v.x = v.x + 1 end
+	while s.y > v.y + v.h - v.pad do v.y = v.y + 1 end
+end
+
 function gameOver()
 end
 
 function gameQuit()
     love.event.push("q")    
-end
-
-function updateView(dt)
 end
 
 -- ****************************************
@@ -147,6 +157,7 @@ end
 -- ****************************************
 --   Game
 -- ****************************************
+
 
 function initScoreHandler()
     scoreHandler = {}
@@ -226,8 +237,7 @@ function updateSnake(dt)
         s.y = s.y + s.vy
         s.pvx = s.vx
         s.pvy = s.vy
-    
-        -- Face snake head. FACE SNAKE HEAD
+   
         if s.vx == -1 then s.head = spr.snakeW
         elseif s.vx == 1 then s.head = spr.snakeE
         elseif s.vy ==-1 then s.head = spr.snakeN
@@ -334,7 +344,7 @@ function newBlock(x, y)
 	local i
 	local b = blocks
 
-	-- No duping
+	-- Disallow dirty, filthy clones
 	for i=1, table.getn(b) do
 		if x == b[i].x and b[i].y == y then
 			return
@@ -381,7 +391,7 @@ function initFruit()
     math.randomseed( os.time() )
     math.random()
     
-	-- Set fruit to maximum rand. Engage.
+	-- Set fruit to maximum initialized state. Engage.
     newFruit()
 end
 
@@ -535,7 +545,9 @@ function drawTile(sprite,x,y)
 end
 
 function drawSprite(sprite,x,y)
-    love.graphics.drawq(sprite[1], sprite[2], (x-gfx.x)*gfx.scale, (y-gfx.y)*gfx.scale, 0.0, gfx.scale, gfx.scale)
+	x = x - view.x * gfx.tile
+	y = y - view.y * gfx.tile
+    love.graphics.drawq(sprite[1], sprite[2], x*gfx.scale, y*gfx.scale, 0.0, gfx.scale, gfx.scale)
 end
 
 function spriteSheet(img,tile)
