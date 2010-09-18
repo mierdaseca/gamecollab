@@ -17,6 +17,7 @@
 --   + The video game
 --   + Coffee
 --   + Show /r/RMAG how it's done. LIKE A BOSS
+--   - My ass hurts from this chair
 --
 
 -- ****************************************
@@ -37,8 +38,10 @@ function love.load()
     gfx.image:setFilter("nearest", "nearest")
     gfx.scale = 2
     gfx.tile = 16
-    gfx.x = 2 * gfx.tile - (gfx.tile/2)
-    gfx.y = 3 * gfx.tile + (gfx.tile/2)
+    -- gfx.x = 2 * gfx.tile - (gfx.tile/2)
+    -- gfx.y = 3 * gfx.tile + (gfx.tile/2)
+	gfx.x = 0
+    gfx.y = 0
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
@@ -57,8 +60,8 @@ function love.load()
 	spr.block = gfx.sprites[4][4]
     
     game = {}
-    game.width = 20
-    game.height = 12
+    game.width = 40
+    game.height = 24
     
     initScoreHandler()
     initFruit()
@@ -70,6 +73,7 @@ end
 
 function love.update(dt)
     updateSnake(dt)
+	updateView(dt)
 end
 
 function love.draw()
@@ -78,7 +82,7 @@ function love.draw()
     drawFruit()
 	drawBlocks()
     drawBorder()
-    drawHud()
+    -- drawHud()
 end
 
 function love.keypressed(key)
@@ -99,6 +103,10 @@ end
 
 function gameQuit()
     love.event.push("q")    
+end
+
+function updateView(dt)
+	
 end
 
 -- ****************************************
@@ -342,7 +350,7 @@ function drawBlocks()
 	end
 end
 
-function blockTouch(x, y)
+function blockTouch(x,y)
 	local i
     local b = blocks
 	
@@ -379,6 +387,7 @@ function newFruit()
     while loop do
         loop = false
         
+		-- Randomize fruit
         f.x = math.random(1, game.width-1)
         f.y = math.random(1, game.height-1)
         
@@ -515,7 +524,7 @@ end
 -- ****************************************
 
 function drawTile(sprite,x,y)
-    drawSprite(sprite, x*gfx.tile, y*gfx.tile)
+    drawSprite(sprite, (x-1)*gfx.tile, (y-1)*gfx.tile)
 end
 
 function drawSprite(sprite,x,y)
