@@ -1,10 +1,10 @@
--- ========================================
+-- ==================================================
 --
 --     main.lua
 --
 --
 --
--- ========================================
+-- ==================================================
 
 -- Don't forget that Lua arrays begin at 1!
 -- "for i=1, 10 do" is a range of 1 to 10
@@ -16,11 +16,12 @@
 --   + The graphics
 --   + The video game
 --   + Coffee
+--   + Show /r/RMAG how it's done. LIKE A BOSS
 --
 
--- ******************************
+-- ****************************************
 --   Love
--- ******************************
+-- ****************************************
 
 function love.load()
     
@@ -82,17 +83,24 @@ end
 
 function love.keypressed(key)
     if key == "escape" or key == "q" then
-        gameOver()
+        gameQuit()
     elseif key == "r" then
         love.filesystem.load("main.lua")()
         love.load()
     end
 end
 
+-- ****************************************
+--   Game
+-- ****************************************
 
--- ******************************
+function gameQuit()
+    love.event.push("q")    
+end
+
+-- ****************************************
 --   Hud
--- ******************************
+-- ****************************************
 
 function initHud()
     local img = gfx.image
@@ -118,70 +126,9 @@ function drawHud()
 	love.graphics.printf("100,000,000", gfx.width - 24, 48, 0, "right")
 end
 
--- ******************************
---   Blocks
--- ******************************
-
-function initBlocks()
-	blocks = {}
-	
-	newBlock(5,5)
-	newBlock(5,6)
-	newBlock(6,5)
-	newBlock(6,6)
-	
-	newBlock(6,4)
-	newBlock(6,5)
-	newBlock(7,4)
-	newBlock(7,5)
-end
-
-function newBlock(x, y)
-	local i
-	local b = blocks
-
-	for i=1, table.getn(b) do
-		if x == b[i].x and b[i].y == y then
-			return
-		end
-	end
-	
-	b = {}
-	b.x = x
-	b.y = y
-
-	table.insert(blocks, b)
-end
-
-function drawBlocks()
-	local i
-	local b = blocks
-	
-	for i=1, table.getn(b) do
-		drawTile(spr.block, b[i].x, b[i].y)
-	end
-end
-
-function blockTouch(x, y)
-	local i
-    local b = blocks
-	
-    for i=1, table.getn(b) do
-        if x == b[i].x and y == b[i].y then
-			return true
-		end
-    end
-	
-    return false
-end
-
--- ******************************
---   Score
--- ******************************
-
-function gameOver()
-    love.event.push("q")    
-end
+-- ****************************************
+--   Game
+-- ****************************************
 
 function initScoreHandler()
     scoreHandler = {}
@@ -213,9 +160,9 @@ function initScoreHandler()
 
 end
 
--- ******************************
+-- ****************************************
 --   Snake
--- ******************************
+-- ****************************************
 
 function initSnake()
     snake = {}
@@ -271,16 +218,12 @@ function updateSnake(dt)
         -- Wall collision
         local w, h = 1+game.width, 1+game.height
         if s.x < 1    or s.x >= w or s.y < 1    or s.y >= h then
-            gameOver()
+            gameQuit()
         end        
 		
 		-- Block collision
-		local b
-		for i=1, table.getn(blocks) do
-			b = blocks[i]
-			if s.x == b.x and s.y == b.y then
-				gameOver()
-			end
+		if blockTouch(s.x, s.y) then
+			gameQuit()
 		end
         
         -- Fruit collision
@@ -299,7 +242,7 @@ function updateSnake(dt)
 		-- Self collision
 		for i=1, table.getn(s) do
             if s.x == s[i].x and s.y == s[i].y then
-                gameOver()
+                gameQuit()
             end
 		end
             
@@ -345,9 +288,111 @@ function snakeSize(n)
 	end
 end
 
--- ******************************
+-- ****************************************
+--   Blocks
+-- ****************************************
+
+function initBlocks()
+	blocks = {}
+	
+	newBlock(5,5)
+	newBlock(5,6)
+	newBlock(6,5)
+	newBlock(6,6)
+	
+	newBlock(6,4)
+	newBlock(6,5)
+	newBlock(7,4)
+	newBlock(7,5)
+end
+
+function newBlock(x, y)
+	local i
+	local b = blocks
+
+	for i=1, table.getn(b) do
+		if x == b[i].x and b[i].y == y then
+			return
+		end
+	end
+	
+	b = {}
+	b.x = x
+	b.y = y
+
+	table.insert(blocks, b)
+end
+
+function drawBlocks()
+	local i
+	local b = blocks
+	
+	for i=1, table.getn(b) do
+		drawTile(spr.block, b[i].x, b[i].y)
+	end
+end
+
+function blockTouch(x, y)
+	local i
+    local b = blocks
+	
+    for i=1, table.getn(b) do
+        if x == b[i].x and y == b[i].y then
+			return true
+		end
+    end
+	
+    return false
+end
+
+-- ****************************************
+--  Fruit
+-- ****************************************
+
+function initFruit()
+    fruit = {}
+    
+    -- Random seed
+    math.randomseed( os.time() )
+    math.random()
+    
+    fruit.x = math.random(1, game.width-1)
+    fruit.y = math.random(1, game.height-1)
+end
+
+function newFruit()
+    local s = snake
+    local f = fruit
+    
+    -- Random seed
+    math.randomseed( os.time() )
+    math.random()
+    
+    -- Ensure fruit spawns in empty space
+    local loop = true
+    while loop do
+        loop = false
+        
+        f.x = math.random(1, game.width-1)
+        f.y = math.random(1, game.height-1)
+        
+		-- Hello ladies. Look at your loop. Now back to mine. THE LOOP IS NOW SIMPLIFIED AND MORE COMPACT
+        if snakeTouch(f.x, f.y) then
+			loop = true
+		elseif blockTouch(f.x, f.y) then
+			loop = true
+		end
+		
+    end
+end
+
+function drawFruit()
+    drawTile(spr.fruit, fruit.x, fruit.y)
+end
+
+-- ****************************************
 --   Map
--- ******************************
+-- ****************************************
 
 function drawGround()
     local i, x, y
@@ -464,53 +509,9 @@ function drawBorder()
     end
 end
 
--- ******************************
---  Fruit
--- ******************************
-
-function initFruit()
-    fruit = {}
-    
-    -- Random seed
-    math.randomseed( os.time() )
-    math.random()
-    
-    fruit.x = math.random(1, game.width-1)
-    fruit.y = math.random(1, game.height-1)
-end
-
-function newFruit()
-    local s = snake
-    local f = fruit
-    
-    -- Random seed
-    math.randomseed( os.time() )
-    math.random()
-    
-    -- Ensure fruit spawns in empty space
-    local loop = true
-    while loop do
-        loop = false
-        
-        f.x = math.random(1, game.width-1)
-        f.y = math.random(1, game.height-1)
-        
-        for i=1, table.getn(s) do
-            if (f.x == s[i].x and f.y == s[i].y) or (f.x == s.x and f.y == s.y) then
-                loop = true
-                break
-            end
-        end
-    end
-end
-
-function drawFruit()
-    drawTile(spr.fruit, fruit.x, fruit.y)
-end
-
--- ******************************
+-- ****************************************
 --  Helpers
--- ******************************
+-- ****************************************
 
 function drawTile(sprite,x,y)
     drawSprite(sprite, x*gfx.tile, y*gfx.tile)
