@@ -60,8 +60,8 @@ function love.load()
     game.height = 18
     
     view = {}
-    view.x = -6
-    view.y = -6
+    view.x = -4
+    view.y = 0
     view.w = (gfx.width / gfx.tile) / gfx.scale
     view.h = (gfx.height / gfx.tile) / gfx.scale
     view.pad = 6
@@ -350,7 +350,6 @@ function initBlocks()
     local x, y
     for x=1, map.w do
         for y=1, map.h do
-        
             if map[y][x] == 1 then  
                 newBlock(x, y)
             end
