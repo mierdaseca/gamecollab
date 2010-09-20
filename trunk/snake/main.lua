@@ -52,8 +52,16 @@ function love.load()
     spr.snakeE= gfx.sprites[3][1]
     spr.snakeN= gfx.sprites[4][1]
     spr.snakeS= gfx.sprites[5][1]
-    spr.fruit = gfx.sprites[4][3]
-    spr.block = gfx.sprites[4][4]
+	
+    spr.enemy = gfx.sprites[1][2]
+    spr.enemyW= gfx.sprites[2][2]
+    spr.enemyE= gfx.sprites[3][2]
+    spr.enemyN= gfx.sprites[4][2]
+    spr.enemyS= gfx.sprites[5][2]
+    
+	spr.fruit = gfx.sprites[4][3]
+    spr.block = gfx.sprites[4][4]	
+	
     
     game = {}
     game.width = 30
@@ -64,10 +72,11 @@ function love.load()
     view.y = 0
     view.w = (gfx.width / gfx.tile) / gfx.scale
     view.h = (gfx.height / gfx.tile) / gfx.scale
-    view.pad = 6
+    view.pad = 8
     
     initScoreHandler()
     initSnake()
+	initEnemy()
     initBlocks()
     initFruit()
     initBorder()
@@ -76,12 +85,14 @@ end
 
 function love.update(dt)
     updateSnake(dt)
+	updateEnemy(dt)
     updateView(dt)
 end
 
 function love.draw()
     drawGround()
-    drawSnake()
+    drawSnake(snake)
+    drawSnake(enemy)
     drawFruit()
     drawBlocks()
     drawBorder()
@@ -201,11 +212,98 @@ function initSnake()
     snake.head = spr.snakeE
     
     -- Populate snake with bodies
-    snakeSize(4)
+    snakeSize(snake, 4)
+    
+end
+
+function initEnemy()
+    enemy = {}
+    
+    enemy.x = game.width - 5
+    enemy.y = game.height - 2
+    enemy.vx = -1
+    enemy.vy = 0
+    enemy.pvx = -1  -- previous snake velocity
+    enemy.pvy = 0
+    enemy.time = 0.0
+    enemy.speed = scoreHandler[1].snakeSpeed
+    enemy.body = spr.enemy
+    enemy.head = spr.enemyW
+    
+    -- Populate snake with bodies
+    snakeSize(enemy, 4)
     
 end
 
 function updateSnake(dt)
+    local s = snake
+    local i
+    
+    -- Snake input
+    if love.keyboard.isDown("left") and s.pvx ~= 1 then turnSnake(snake, -1,0)
+    elseif love.keyboard.isDown("right") and s.pvx ~= -1 then turnSnake(snake, 1,0)
+    elseif love.keyboard.isDown("up") and s.pvy ~= 1 then turnSnake(snake, 0,-1)
+    elseif love.keyboard.isDown("down") and s.pvy ~= -1 then turnSnake(snake, 0,1) end
+    
+    -- Can move?
+    if s.time <= 0.0 then
+        s.time = s.speed
+        
+        -- Move the snake
+        local body = {}
+        body.x = s.x
+        body.y = s.y
+        table.insert(snake, body)
+
+        s.x = s.x + s.vx
+        s.y = s.y + s.vy
+        s.pvx = s.vx
+        s.pvy = s.vy
+   
+        if s.vx == -1 then s.head = spr.snakeW
+        elseif s.vx == 1 then s.head = spr.snakeE
+        elseif s.vy ==-1 then s.head = spr.snakeN
+        elseif s.vy == 1 then s.head = spr.snakeS end
+
+        -- Wall collision
+        local w, h = 1+game.width, 1+game.height
+        if s.x < 1    or s.x >= w or s.y < 1 or s.y >= h then
+            gameQuit()
+        end        
+        
+        -- Block collision
+        if blockTouch(s.x, s.y) then
+            gameQuit()
+        end
+        
+        -- Fruit collision
+        if s.x == fruit.x and s.y == fruit.y then
+            scoreHandler.score = scoreHandler.score + 1
+            local nextlevel = scoreHandler.level + 1
+            if scoreHandler[nextlevel].level <= scoreHandler.score then
+                scoreHandler.level = scoreHandler.level + 1
+                snake.speed = scoreHandler[nextlevel].snakeSpeed
+            end
+            newFruit()
+        else
+            table.remove(snake, 1)
+        end
+        
+        -- Self collision
+        for i=1, table.getn(s) do
+            if s.x == s[i].x and s.y == s[i].y then
+                gameQuit()
+            end
+        end
+            
+    else
+        s.time = s.time - dt
+    end
+end
+
+function updateEnemy(dt)
+	--[[
+	
     local s = snake
     local i
     
@@ -269,15 +367,18 @@ function updateSnake(dt)
     else
         s.time = s.time - dt
     end
+											]]--
+	end
+
+
+
+function turnSnake(theSnake, x,y)
+	theSnake.vx = x
+    theSnake.vy = y
 end
 
-function turnSnake(x,y)
-    snake.vx = x
-    snake.vy = y
-end
-
-function drawSnake(x,y)
-    local s = snake
+function drawSnake(theSnake, x,y)
+    local s = theSnake
     
     drawTile(s.head, s.x, s.y)
     
@@ -303,14 +404,26 @@ function snakeTouch(x,y)
     return false
 end
 
-function snakeSize(n)
+function snakeSize(theSnake, n)
     local body, i
     
     for i=0, n-1 do
         body = {}
-        body.x = snake.x - (n-i)
-        body.y = snake.y
-        table.insert(snake, body)
+				
+		if theSnake.vx == 0 and theSnake.vy == -1 then -- North
+			body.x = theSnake.x
+			body.y = theSnake.y + (n-i)
+		elseif theSnake.vx == 1 and theSnake.vy == 0 then -- East
+			body.x = theSnake.x - (n-i)
+			body.y = theSnake.y
+		elseif theSnake.vx == 0 and theSnake.vy == 1 then -- South
+			body.x = theSnake.x
+			body.y = theSnake.y - (n-i)
+		elseif theSnake.vx == -1 and theSnake.vy == 0 then -- West
+			body.x = theSnake.x + (n-i)
+			body.y = theSnake.y
+		end
+        table.insert(theSnake, body)
     end
 end
 
@@ -327,12 +440,12 @@ function initBlocks()
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0 },
-        { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
+        { 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
         { 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0 },
+        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
