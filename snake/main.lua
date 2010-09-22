@@ -361,7 +361,7 @@ function turnSnake(theSnake, x,y)
     theSnake.vy = y
 end
 
-function drawSnake(theSnake, x,y)
+function drawSnake(theSnake,x,y)
     local s = theSnake
     
     drawTile(s.head, s.x, s.y)
