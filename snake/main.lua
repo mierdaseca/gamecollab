@@ -11,14 +11,10 @@
 -- different to how arrays are iterated in C:
 -- "for( i=0; i<10; i++ )" range of 0 to 9
 
--- TODO:
---
---   + The graphics
---   + The video game
---   + Coffee
---   + Show /r/RMAG how it's done. LIKE A BOSS
---   - My ass hurts from this chair
---
+-- game.width, game.height fields removed
+
+require("map01.lua")
+require("map02.lua")
 
 -- ****************************************
 --   Love
@@ -61,25 +57,20 @@ function love.load()
     
 	spr.fruit = gfx.sprites[4][3]
     spr.block = gfx.sprites[4][4]	
-	
-    
-    game = {}
-    game.width = 30
-    game.height = 18
-    
+
     view = {}
     view.x = -4
     view.y = 0
     view.w = (gfx.width / gfx.tile) / gfx.scale
     view.h = (gfx.height / gfx.tile) / gfx.scale
     view.pad = 8
-    
+
+	initMap(map02) -- Important
+	
     initScoreHandler()
     initSnake()
 	initEnemy()
-    initBlocks()
     initFruit()
-    initBorder()
     initHud()
 end
 
@@ -90,12 +81,11 @@ function love.update(dt)
 end
 
 function love.draw()
-    drawGround()
+	drawMap()
+	drawShadows()
     drawSnake(snake)
     drawSnake(enemy)
     drawFruit()
-    drawBlocks()
-    drawBorder()
     -- drawHud()
 end
 
@@ -200,8 +190,8 @@ function initSnake()
     snake = {}
     
     -- Badger badger badger badger SNAAAAKE
-    snake.x = 5
-    snake.y = 2
+    snake.x = map.px
+	snake.y = map.py
     snake.vx = 1
     snake.vy = 0
     snake.pvx = 1  -- previous snake velocity
@@ -219,8 +209,8 @@ end
 function initEnemy()
     enemy = {}
     
-    enemy.x = game.width - 5
-    enemy.y = game.height - 2
+    enemy.x = map.ex
+    enemy.y = map.ey
     enemy.vx = -1
     enemy.vy = 0
     enemy.pvx = -1  -- previous snake velocity
@@ -264,17 +254,11 @@ function updateSnake(dt)
         elseif s.vx == 1 then s.head = spr.snakeE
         elseif s.vy ==-1 then s.head = spr.snakeN
         elseif s.vy == 1 then s.head = spr.snakeS end
-
-        -- Wall collision
-        local w, h = 1+game.width, 1+game.height
-        if s.x < 1    or s.x >= w or s.y < 1 or s.y >= h then
-            gameQuit()
-        end        
-        
-        -- Block collision
-        if blockTouch(s.x, s.y) then
-            gameQuit()
-        end
+		
+		-- Solid collision
+		if solidTouch(s.x, s.y) then
+			gameQuit()
+		end
         
         -- Fruit collision
         if s.x == fruit.x and s.y == fruit.y then
@@ -428,89 +412,6 @@ function snakeSize(theSnake, n)
 end
 
 -- ****************************************
---   Blocks
--- ****************************************
-
-function initBlocks()
-    blocks = {}
-    
-    -- Block map
-    map =
-    {
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
-        { 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
-        { 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-    }
-        
-    map.w = 30
-    map.h = 18
-
-    local x, y
-    for x=1, map.w do
-        for y=1, map.h do
-            if map[y][x] == 1 then  
-                newBlock(x, y)
-            end
-        end
-    end
-end
-
-function newBlock(x, y)
-    local i
-    local b = blocks
-
-    -- Disallow dirty, filthy clones
-    for i=1, table.getn(b) do
-        if x == b[i].x and b[i].y == y then
-            return
-        end
-    end
-    
-    -- Create new block
-    b = {}
-    b.x = x
-    b.y = y
-    table.insert(blocks, b)
-end
-
-function drawBlocks()
-    local i
-    local b = blocks
-    
-    for i=1, table.getn(b) do
-        drawTile(spr.block, b[i].x, b[i].y)
-    end
-end
-
-function blockTouch(x,y)
-    local i
-    local b = blocks
-    
-    for i=1, table.getn(b) do
-        if x == b[i].x and y == b[i].y then
-            return true
-        end
-    end
-    
-    return false
-end
-
--- ****************************************
 --  Fruit
 -- ****************************************
 
@@ -535,14 +436,24 @@ function newFruit()
         loop = false
         
         -- Randomize fruit
-        f.x = math.random(1, game.width-1)
-        f.y = math.random(1, game.height-1)
-        
+        f.x = math.random(1, map.w)
+        f.y = math.random(1, map.h)
+		
         -- Hello ladies. Look at your loop. Now back to mine. THE COLLISION CHECKING IS NOW SIMPLIFIED AND MORE COMPACT
         if snakeTouch(f.x, f.y) then
             loop = true
-        elseif blockTouch(f.x, f.y) then
+        elseif solidTouch(f.x, f.y) then
             loop = true
+		else
+			n = 0
+			if solidTouch(f.x, f.y-1) then n = n+1 end
+			if solidTouch(f.x+1, f.y) then n = n+1 end
+			if solidTouch(f.x, f.y+1) then n = n+1 end
+			if solidTouch(f.x-1, f.y) then n = n+1 end
+			
+			if n >= 2 then
+				loop = true
+			end
         end
         
     end
@@ -556,113 +467,103 @@ end
 --   Map
 -- ****************************************
 
-function drawGround()
+function t2s(t)
+	local x, y
+	local w = 16 -- gfx.image:getWidth() / gfx.tile
+	
+	x = t % w
+	y = (t - x) / w
+			
+	return x+1, y+1
+end
+
+function s2t(x,y)
+	return (x-1) + (y-1) * 16 -- gfx.image:getWidth() / gfx.tile
+end
+
+function initMap(m)
+	local x, y
+	
+	map = m
+	
+	map.px = map.px + 1
+	map.py = map.py + 1
+	map.ex = map.ex + 1
+	map.ey = map.ey + 1
+	
+	-- Init a 2D collision array to "solid" state
+	solid = {}
+	
+	for x=1, map.w do
+        solid[x] = {}
+        for y=1, map.h do
+           solid[x][y] = 1
+        end
+    end
+	
+	solid.w = map.w
+	solid.h = map.h
+	
+	-- Chisel away where the "empty" tiles are
+	for x=1, map.w do
+        for y=1, map.h do
+			local t = map[y][x]
+			
+			if t == s2t(1,3) or t == s2t(2,3) or t == s2t(3,3) or t == s2t(5,3) or
+				t == s2t(1,4) or t == s2t(2,4) or t == s2t(3,4) then 
+			
+				solid[x][y] = 0
+		
+			end	
+		end
+	end
+end
+
+function drawMap()
+	local x, y
+	local i, j
+	
+	for x=1, map.w do
+        for y=1, map.h do
+			i, j = t2s(map[y][x])
+			drawTile(gfx.sprites[i][j], x, y)
+		end
+	end
+end
+
+function solidTouch(x,y)
+	if solid[x][y] == 1 then
+		return true
+	else
+		return false
+	end
+end
+
+function drawShadows()
     local i, x, y
     local nw, n, w
     
-    -- Draw ground
-    drawTile(gfx.sprites[1][3], 1, 1)
-    for i=2, game.width do drawTile(gfx.sprites[2][3], i, 1) end
-    for i=2, game.height do drawTile(gfx.sprites[1][4], 1, i) end
-    for x=2, game.width do
-        for y=2, game.height do
+    for x=3, map.w-2 do
+        for y=3, map.h-2 do
+			if solid[x][y] == 0 then
         
-            -- Block shadow
-            nw = blockTouch(x-1, y-1)
-            n = blockTouch(x, y-1)
-            w = blockTouch(x-1,y)
-            
-            if w and n then
-                drawTile(gfx.sprites[1][3], x, y)
-            elseif not nw and n then
-                drawTile(gfx.sprites[2][4], x, y)
-            elseif not nw and w then
-                drawTile(gfx.sprites[3][4], x, y)
-            elseif nw and not n and not w then
-                drawTile(gfx.sprites[3][3], x, y)
-            elseif w then
-                drawTile(gfx.sprites[1][4], x, y)
-            elseif n then
-                drawTile(gfx.sprites[2][3], x, y)
-            else
-                drawTile(gfx.sprites[5][3], x, y)
-            end
-                
-            -- Snake shadow
-            nw = snakeTouch(x-1, y-1)
-            n = snakeTouch(x, y-1)
-            w = snakeTouch(x-1,y)
-            
-            if nw and not n and not w then
-                drawTile(gfx.sprites[3][5], x, y)
-            elseif w and n then
-                drawTile(gfx.sprites[1][5], x, y)
-            elseif w then
-                drawTile(gfx.sprites[1][6], x, y)
-            elseif n then
-                drawTile(gfx.sprites[2][5], x, y)
-            end
-            
+				-- Snake shadow
+				nw = snakeTouch(x-1, y-1)
+				n = snakeTouch(x, y-1)
+				w = snakeTouch(x-1,y)
+				
+				if nw and not n and not w then
+					drawTile(gfx.sprites[3][5], x, y)
+				elseif w and n then
+					drawTile(gfx.sprites[1][5], x, y)
+				elseif w then
+					drawTile(gfx.sprites[1][6], x, y)
+				elseif n then
+					drawTile(gfx.sprites[2][5], x, y)
+				end
+				
+			end
         end
-    end
-end
-
-function initBorder()
-    local img = gfx.image
-    local w, h = img:getWidth(), img:getHeight()
-    local t = gfx.tile
-    local x, y = 5, -3
-    
-    leaves = {}
-    
-    leaves.NW = { img, love.graphics.newQuad((x+0)*t, (y+3)*t, 32, 32, w, h) }
-    leaves.N  = { img, love.graphics.newQuad((x+2)*t, (y+3)*t, 16, 32, w, h) }
-    leaves.NE = { img, love.graphics.newQuad((x+3)*t, (y+3)*t, 32, 32, w, h) }
-    
-    leaves.W1 = { img, love.graphics.newQuad((x+0)*t, (y+5)*t, 32, 16, w, h) }
-    leaves.W2  ={ img, love.graphics.newQuad((x+0)*t, (y+6)*t, 32, 16, w, h) }
-    leaves.W3 = { img, love.graphics.newQuad((x+0)*t, (y+7)*t, 32, 16, w, h) }
-    
-    leaves.E1 = { img, love.graphics.newQuad((x+3)*t, (y+5)*t, 32, 16, w, h) }
-    leaves.E2  = { img, love.graphics.newQuad((x+3)*t, (y+6)*t, 32, 16, w, h) }
-    leaves.E3 = { img, love.graphics.newQuad((x+3)*t, (y+7)*t, 32, 16, w, h) }
-    
-    leaves.SW = { img, love.graphics.newQuad((x+0)*t, (y+8)*t, 32, 32, w, h) }
-    leaves.S  = { img, love.graphics.newQuad((x+2)*t, (y+8)*t, 16, 32, w, h) }
-    leaves.SE = { img, love.graphics.newQuad((x+3)*t, (y+8)*t, 32, 32, w, h) }
-end
-
-function drawBorder()
-    local i, j
-    local w, h = game.width, game.height
-    local g = gfx.sprites
-    
-    -- Draw north border
-    drawTile(leaves.NW, -1, -1)
-    drawTile(leaves.NE, w+1, -1)
-    for i=1, w do
-        drawTile(leaves.N, i, -1)
-    end
-    
-    -- Draw west border
-    drawTile(leaves.W1, -1, 1)
-    drawTile(leaves.W3, -1, h)
-    for i=1, h-1 do
-        drawTile(leaves.W2, -1, i)
-    end
-    
-    -- Draw east border
-    drawTile(leaves.E1, w+1, 1)
-    drawTile(leaves.E3, w+1, h)
-    for i=1, h-1 do
-        drawTile(leaves.E2, w+1, i)
-    end
-    
-    -- Draw south border
-    drawTile(leaves.SW, -1, h+1)
-    drawTile(leaves.SE, w+1, h+1)
-    for i=1, w do
-        drawTile(leaves.S, i, h+1)
     end
 end
 

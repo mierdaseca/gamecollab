@@ -1,0 +1,23 @@
+map
+{
+	name "map02"
+	x 0
+	y -2
+	zoom 1
+	width 128
+	height 128
+	rgb 0, 0, 0
+}
+
+obj Player
+{
+	x 121
+	y 188
+}
+
+obj Enemy
+{
+	x 416
+	y 192
+}
+
