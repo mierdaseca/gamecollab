@@ -14,8 +14,8 @@ function initSnake()
     snake = {}
     
     -- Badger badger badger badger SNAAAAKE
-    snake.x = map.px
-	snake.y = map.py
+    snake.x = map.px + 1
+	snake.y = map.py + 1
     snake.vx = 1
     snake.vy = 0
     snake.pvx = 1  -- previous snake velocity
@@ -33,8 +33,8 @@ end
 function initEnemy()
     enemy = {}
     
-    enemy.x = map.ex
-    enemy.y = map.ey
+    enemy.x = map.ex + 1
+    enemy.y = map.ey + 1
     enemy.vx = -1
     enemy.vy = 0
     enemy.pvx = -1  -- previous snake velocity
@@ -81,7 +81,7 @@ function updateSnake(dt)
 		
 		-- Solid collision
 		if solidTouch(s.x, s.y) then
-			gameQuit()
+			gameDie()
 		end
         
         -- Fruit collision
@@ -100,7 +100,7 @@ function updateSnake(dt)
         -- Self collision
         for i=1, table.getn(s) do
             if s.x == s[i].x and s.y == s[i].y then
-                gameQuit()
+                gameDie()
             end
         end
             

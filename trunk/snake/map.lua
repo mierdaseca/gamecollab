@@ -19,12 +19,6 @@ function initMap()
 	-- Load map01.lua
 	map = map01
 	
-	-- Offset player & enemy start values
-	map.px = map.px + 1
-	map.py = map.py + 1
-	map.ex = map.ex + 1
-	map.ey = map.ey + 1
-	
 	-- Init a 2D collision array to "solid" state
 	solid = {}
 	
