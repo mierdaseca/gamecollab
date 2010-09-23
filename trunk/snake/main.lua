@@ -221,10 +221,6 @@ function updateView(dt)
     if s.y * gfx.tile * gfx.scale < v.y + v.h then v.y = v.y - gfx.scale end
 	if s.x * gfx.tile * gfx.scale > v.x + gfx.width - v.w then v.x = v.x + gfx.scale end
     if s.y * gfx.tile * gfx.scale > v.y + gfx.height - v.h then v.y = v.y + gfx.scale end
-	--[[
-    if s.x * gfx.tile - v.pad > v.x + v.w then v.x = v.x + gfx.scale end
-    if s.y * gfx.tile - v.pad > v.y + v.h then v.y = v.y + gfx.scale end
-	]]--
 end
 
 function gameDie()
