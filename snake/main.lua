@@ -44,6 +44,9 @@ function love.load()
 	screen.menu = loadImage("menu", "images/menu.png")
 	screen.dead = loadImage("dead", "images/dead.png")
 	screen.gameover = loadImage("gameover", "images/gameover.png")
+	screen.three = loadImage("three", "images/three.png")
+	screen.two = loadImage("two", "images/two.png")
+	screen.one = loadImage("one", "images/one.png")
 
     font = {}
     font = love.graphics.newImageFont("images/font.png", "1234567890, ")
@@ -78,8 +81,13 @@ function love.load()
 	spr.forkS = gfx.sprites[4][7]
     
 	spr.fruit = gfx.sprites[4][3]
-    spr.block = gfx.sprites[4][4]	
-
+    spr.block = gfx.sprites[4][4]
+	
+	game = {}
+	
+	game.lives = -1
+	game.time = 0.0
+	
     view = {}
     view.x = 0
     view.y = 0
@@ -134,7 +142,8 @@ function stateUpdate(dt)
 	elseif state == "menu" then
 		if keys.down["return"] then
 			state = "game"
-			lives = 3
+			game.lives = 3
+			game.time = 0.00
 			stateInit()
 		elseif keys.down["escape"] or keys.down["q"]  then
 			gameQuit()
@@ -142,9 +151,15 @@ function stateUpdate(dt)
 	
 	-- Update Game
 	elseif state == "game" then
-		updateSnake(dt)
-		updateEnemy(dt)
-		updateView(dt)
+		
+		if game.time > 3.00 then
+			updateSnake(dt)
+			updateEnemy(dt)
+			updateView(dt)
+		else
+			game.time = game.time + dt
+		end
+		
 		if keys.down["escape"] then
 			state = "pause"
 		end
@@ -160,6 +175,7 @@ function stateUpdate(dt)
 	-- Update Dead
 	elseif state == "dead" then
 		if keys.down["any"] then
+			game.time = 0.0
 			state = "game"
 			stateInit()
 		end
@@ -196,6 +212,10 @@ function stateDraw()
 		drawSnake(enemy)
 		drawFruit()
 		
+		if game.time < 1.00 then drawImage(screen.three, 0, 0, "center")
+		elseif game.time < 2.00 then drawImage(screen.two, 0, 0, "center")
+		elseif game.time < 3.00 then drawImage(screen.one, 0, 0, "center") end
+		
 	-- Draw Pause
 	elseif state == "pause" then
 		drawImage(screen.pause, 0, 0, "center")
@@ -229,9 +249,9 @@ function updateView(dt)
 end
 
 function gameDie()
-	lives = lives - 1
+	game.lives = game.lives - 1
 	
-	if lives == 0 then
+	if game.lives == 0 then
 		state = "gameover"
 	else
 		state = "dead"
