@@ -135,6 +135,8 @@ function stateUpdate(dt)
 	elseif state == "pause" then
 		if keys.down["escape"] then
 			state = "game"
+		elseif keys.down["q"] then
+			gameQuit()
 		end
 	end
 	
