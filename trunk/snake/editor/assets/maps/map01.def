@@ -11,13 +11,13 @@ map
 
 obj Player
 {
-	x 89
+	x 121
 	y 76
 }
 
 obj Enemy
 {
-	x 272
-	y 208
+	x 256
+	y 192
 }
 
