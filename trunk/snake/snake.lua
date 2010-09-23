@@ -24,6 +24,7 @@ function initSnake()
     snake.speed = scoreHandler[1].snakeSpeed
     snake.body = spr.snake
     snake.head = spr.snakeE
+	snake.fork = spr.forkE
     
     -- Populate snake with bodies
     snakeSize(snake, 4)
@@ -43,6 +44,7 @@ function initEnemy()
     enemy.speed = scoreHandler[1].snakeSpeed
     enemy.body = spr.enemy
     enemy.head = spr.enemyW
+	enemy.fork = spr.forkW
     
     -- Populate snake with bodies
     snakeSize(enemy, 4)
@@ -74,10 +76,10 @@ function updateSnake(dt)
         s.pvx = s.vx
         s.pvy = s.vy
    
-        if s.vx == -1 then s.head = spr.snakeW
-        elseif s.vx == 1 then s.head = spr.snakeE
-        elseif s.vy ==-1 then s.head = spr.snakeN
-        elseif s.vy == 1 then s.head = spr.snakeS end
+        if s.vx == -1 then s.head = spr.snakeW s.fork = spr.forkW
+        elseif s.vx == 1 then s.head = spr.snakeE s.fork = spr.forkE
+        elseif s.vy ==-1 then s.head = spr.snakeN s.fork = spr.forkN
+        elseif s.vy == 1 then s.head = spr.snakeS s.fork = spr.forkS end
 		
 		-- Solid collision
 		if solidTouch(s.x, s.y) then
@@ -85,7 +87,7 @@ function updateSnake(dt)
 		end
         
         -- Fruit collision
-        if s.x == fruit.x and s.y == fruit.y then
+        if fruitTouch(s.x, s.y) then
             scoreHandler.score = scoreHandler.score + 1
             local nextlevel = scoreHandler.level + 1
             if scoreHandler[nextlevel].level <= scoreHandler.score then
@@ -187,8 +189,11 @@ end
 
 function drawSnake(theSnake,x,y)
     local s = theSnake
-    
     drawTile(s.head, s.x, s.y)
+	
+	if solidTouch(s.x+s.pvx, s.y+s.pvy) == false and fruitTouch(s.x+s.pvx, s.y+s.pvy) == false then
+		drawTile(s.fork, s.x+s.pvx, s.y+s.pvy)
+	end
     
     for i=1, table.getn(s) do
         drawTile(s.body, s[i].x, s[i].y)

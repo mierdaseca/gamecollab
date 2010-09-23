@@ -40,18 +40,25 @@ function newFruit()
         elseif solidTouch(f.x, f.y) then
             loop = true
 		else
-			n = 0
+			local n = 0
 			if solidTouch(f.x, f.y-1) then n = n+1 end
 			if solidTouch(f.x+1, f.y) then n = n+1 end
 			if solidTouch(f.x, f.y+1) then n = n+1 end
 			if solidTouch(f.x-1, f.y) then n = n+1 end
-			
 			if n >= 2 then
 				loop = true
 			end
         end
         
     end
+end
+
+function fruitTouch(x,y)
+	if x == fruit.x and y == fruit.y then
+		return true
+	else
+		return false
+	end
 end
 
 function drawFruit()

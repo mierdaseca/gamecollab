@@ -71,6 +71,11 @@ function love.load()
     spr.enemyE= gfx.sprites[3][2]
     spr.enemyN= gfx.sprites[4][2]
     spr.enemyS= gfx.sprites[5][2]
+	
+	spr.forkW = gfx.sprites[1][7]
+	spr.forkE = gfx.sprites[2][7]
+	spr.forkN = gfx.sprites[3][7]
+	spr.forkS = gfx.sprites[4][7]
     
 	spr.fruit = gfx.sprites[4][3]
     spr.block = gfx.sprites[4][4]	
