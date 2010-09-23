@@ -38,7 +38,7 @@ function initEnemy()
     enemy.y = map.ey + 1
     enemy.vx = -1
     enemy.vy = 0
-    enemy.pvx = -1  -- previous snake velocity
+    enemy.pvx = -1
     enemy.pvy = 0
     enemy.time = 0.0
     enemy.speed = scoreHandler[1].snakeSpeed
@@ -46,9 +46,7 @@ function initEnemy()
     enemy.head = spr.enemyW
 	enemy.fork = spr.forkW
     
-    -- Populate snake with bodies
     snakeSize(enemy, 4)
-    
 end
 
 function updateSnake(dt)
@@ -61,7 +59,7 @@ function updateSnake(dt)
     elseif love.keyboard.isDown("up") and s.pvy ~= 1 then turnSnake(snake, 0,-1)
     elseif love.keyboard.isDown("down") and s.pvy ~= -1 then turnSnake(snake, 0,1) end
     
-    -- Can move?
+    -- Can we move yet?
     if s.time <= 0.0 then
         s.time = s.speed
         
@@ -76,6 +74,7 @@ function updateSnake(dt)
         s.pvx = s.vx
         s.pvy = s.vy
    
+		-- Directional snake video images
         if s.vx == -1 then s.head = spr.snakeW s.fork = spr.forkW
         elseif s.vx == 1 then s.head = spr.snakeE s.fork = spr.forkE
         elseif s.vy ==-1 then s.head = spr.snakeN s.fork = spr.forkN
@@ -178,17 +177,14 @@ function updateEnemy(dt)
         s.time = s.time - dt
     end
 											]]--
-	end
-
-
-
-function turnSnake(theSnake, x,y)
-	theSnake.vx = x
-    theSnake.vy = y
 end
 
-function drawSnake(theSnake,x,y)
-    local s = theSnake
+function turnSnake(s, x,y)
+	s.vx = x
+    s.vy = y
+end
+
+function drawSnake(s,x,y)
     drawTile(s.head, s.x, s.y)
 	
 	if solidTouch(s.x+s.pvx, s.y+s.pvy) == false and fruitTouch(s.x+s.pvx, s.y+s.pvy) == false then
@@ -236,6 +232,7 @@ function snakeSize(theSnake, n)
 			body.x = theSnake.x + (n-i)
 			body.y = theSnake.y
 		end
+		
         table.insert(theSnake, body)
     end
 end
