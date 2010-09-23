@@ -30,7 +30,7 @@ map01 =
 
 map01.w = 24
 map01.h = 18
-map01.px = 5
+map01.px = 7
 map01.py = 4
-map01.ex = 17
-map01.ey = 13
+map01.ex = 16
+map01.ey = 12
