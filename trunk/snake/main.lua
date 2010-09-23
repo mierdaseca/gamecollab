@@ -237,7 +237,6 @@ function gameQuit()
     love.event.push("q")    
 end
 
-
 -- ****************************************
 --   Keys/Input
 --
