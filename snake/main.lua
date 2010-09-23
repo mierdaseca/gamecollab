@@ -18,6 +18,7 @@ require("hud.lua")
 require("snake.lua")
 require("fruit.lua")
 require("score.lua")
+require("draw.lua")
 
 -- ****************************************
 --   Main
@@ -28,8 +29,7 @@ function love.load()
     love.graphics.setBackgroundColor(26, 19, 0)
     
     gfx = {}
-    gfx.image = love.graphics.newImage("images/snake.png")
-    gfx.image:setFilter("nearest", "nearest")
+    gfx.image = loadImage("snake", "images/snake.png")
     gfx.scale = 2
     gfx.tile = 16
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
@@ -38,30 +38,26 @@ function love.load()
 	
 	screen = {}
 	
-	screen.intro = love.graphics.newImage("images/intro.png")
-	screen.intro:setFilter("nearest", "nearest")
-	screen.pause = love.graphics.newImage("images/pause.png")
-	screen.pause:setFilter("nearest", "nearest")
-	screen.scores = love.graphics.newImage("images/highscores.png")
-	screen.scores:setFilter("nearest", "nearest")
-	screen.menu = love.graphics.newImage("images/menu.png")
-	screen.menu:setFilter("nearest", "nearest")
-	screen.gameover = love.graphics.newImage("images/gameover.png")
-	screen.gameover:setFilter("nearest", "nearest")
-    
+	screen.intro = loadImage("intro", "images/intro.png")
+	screen.pause = loadImage("pause", "images/pause.png")
+	screen.scores = loadImage("scores", "images/highscores.png")
+	screen.menu = loadImage("menu", "images/menu.png")
+	screen.dead = loadImage("dead", "images/dead.png")
+	screen.gameover = loadImage("gameover", "images/gameover.png")
+
     font = {}
     font = love.graphics.newImageFont("images/font.png", "1234567890, ")
     love.graphics.setFont(font)
 	
 	keys = {}
-	keys.down = {} -- I didn't go with isDown, isHeld, isUp because love.keyboard already has an isDown module/field/table and it behaves differently/stupidly
+	keys.down = {} -- I didn't go with isDown, isHeld & isUp because love.keyboard already has an isDown module/field/table and it behaves differently/stupidly
 	keys.held = {}
 	keys.up = {}
 	
-	keysAdd("escape")
-	keysAdd("return")
-	keysAdd("q")
-	keysAdd("r")
+	keysRegister("escape")
+	keysRegister("return")
+	keysRegister("q")
+	keysRegister("r")
 
     spr = {}
     spr.snake = gfx.sprites[1][1]
@@ -86,7 +82,9 @@ function love.load()
     view.h = (gfx.height / gfx.tile) / gfx.scale
     view.pad = 8
 	
-	state = "game"
+	map = map01
+	
+	state = "intro"
 	
 	stateInit()
 end
@@ -122,8 +120,24 @@ function stateInit()
 end
 
 function stateUpdate(dt)
+	-- Update Intro
+	if state == "intro" then
+		if keys.down["any"] then
+			state = "menu"
+		end
+	
+	-- Update Menu
+	elseif state == "menu" then
+		if keys.down["return"] then
+			state = "game"
+			lives = 3
+			stateInit()
+		elseif keys.down["escape"] or keys.down["q"]  then
+			gameQuit()
+		end
+	
 	-- Update Game
-	if state == "game" then
+	elseif state == "game" then
 		updateSnake(dt)
 		updateEnemy(dt)
 		updateView(dt)
@@ -136,15 +150,42 @@ function stateUpdate(dt)
 		if keys.down["escape"] then
 			state = "game"
 		elseif keys.down["q"] then
-			gameQuit()
+			state = "menu"
 		end
+		
+	-- Update Dead
+	elseif state == "dead" then
+		if keys.down["any"] then
+			state = "game"
+			stateInit()
+		end
+		
+	-- Update Game Over
+	elseif state == "gameover" then
+		if keys.down["any"] then
+			state = "scores"
+		end
+		
+	-- Update High Scores
+	elseif state == "scores" then
+		if keys.down["any"] then
+			state = "menu"
+		end
+		
 	end
-	
 end
 
 function stateDraw()
+	-- Draw Intro
+	if state == "intro" then
+		drawImage(screen.intro, 0, 0, "center")
+		
+	-- Draw Menu
+	elseif state == "menu" then
+		drawImage(screen.menu, 0, 0, "center")
+	
 	-- Draw Game
-	if state == "game" then
+	elseif state == "game" then
 		drawMap()
 		drawShadows()
 		drawSnake(snake)
@@ -154,25 +195,46 @@ function stateDraw()
 	-- Draw Pause
 	elseif state == "pause" then
 		drawImage(screen.pause, 0, 0, "center")
+		
+	-- Draw Dead
+	elseif state == "dead" then
+		drawImage(screen.dead, 0, 0, "center")
+		
+	-- Draw Game Over
+	elseif state == "gameover" then
+		drawImage(screen.gameover, 0, 0, "center")
+		
+	-- Draw High Scores
+	elseif state == "scores" then
+		drawImage(screen.scores, 0, 0, "center")
+
 	end
-	
 end
 
 -- ****************************************
 --   Keys/Input
+--
+--     Index with "any" to see if a key
+--     is being pressed/held. Useful for
+--     intro/score/game over screens?
+--
 -- ****************************************
 
 function love.keypressed(key)
 	keys.down[key] = true
 	keys.held[key] = true
+	keys.down["any"] = true
+	keys.held["any"] = true
 end
 
 function love.keyreleased(key)
-	keys.held[key] = false
 	keys.up[key] = true
+	keys.held[key] = false
+	keys.up["any"] = true
+	keys.held["any"] = false
 end
 
-function keysAdd(key)
+function keysRegister(key)
 	keys.down[key] = false
 	keys.held[key] = false
 	keys.up[key] = false
@@ -181,6 +243,8 @@ end
 function keysUpdate(dt)
 	for k, v in pairs(keys.down) do keys.down[k] = false end
 	for k, v in pairs(keys.up) do keys.up[k] = false end
+	keys.down["any"] = false
+	keys.up["any"] = false
 end
 
 -- ****************************************
@@ -190,58 +254,22 @@ end
 function updateView(dt)
     local s = snake
     local v = view
-    
     while s.x < v.x + v.pad do v.x = v.x - 1 end
     while s.y < v.y + v.pad do v.y = v.y - 1 end
     while s.x > v.x + v.w - v.pad do v.x = v.x + 1 end
     while s.y > v.y + v.h - v.pad do v.y = v.y + 1 end
 end
 
-function gameOver()
+function gameDie()
+	lives = lives - 1
+	
+	if lives == 0 then
+		state = "gameover"
+	else
+		state = "dead"
+	end
 end
 
 function gameQuit()
     love.event.push("q")    
-end
-
-
--- ****************************************
---  Helpers
--- ****************************************
-
-function drawTile(sprite,x,y)
-    drawSprite(sprite, (x-1)*gfx.tile, (y-1)*gfx.tile)
-end
-
-function drawSprite(sprite,x,y)
-    x = x - view.x * gfx.tile
-    y = y - view.y * gfx.tile
-    love.graphics.drawq(sprite[1], sprite[2], x*gfx.scale, y*gfx.scale, 0.0, gfx.scale, gfx.scale)
-end
-
-function spriteSheet(img,tile)
-    local i, j
-    local t = {}
-    local w, h = img:getWidth(), img:getHeight()
-    local x, y = (w/tile), (h/tile)    
-    
-    for i=1, x do
-        t[i] = {}
-        for j=1, y do
-            t[i][j] = { img, love.graphics.newQuad((i-1)*tile, (j-1)*tile, tile, tile, w, h) }
-        end
-    end
-
-    return t
-end
-
-function drawImage(img,x,y,str)
-	if str == "center" then
-		x = gfx.width / 2
-		y = gfx.height / 2
-		x = x - (img:getWidth() / 2)
-		y = y - (img:getHeight() / 2)
-	end
-	
-	love.graphics.draw(img, x, y)
 end
