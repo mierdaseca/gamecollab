@@ -15,9 +15,9 @@ function drawTile(sprite,x,y)
 end
 
 function drawSprite(sprite,x,y)
-    x = x - view.x * gfx.tile
-    y = y - view.y * gfx.tile
-    love.graphics.drawq(sprite[1], sprite[2], x*gfx.scale, y*gfx.scale, 0.0, gfx.scale, gfx.scale)
+    x = (x*gfx.scale) - view.x
+    y = (y*gfx.scale) - view.y
+    love.graphics.drawq(sprite[1], sprite[2], x, y, 0.0, gfx.scale, gfx.scale)
 end
 
 function spriteSheet(img,tile)
