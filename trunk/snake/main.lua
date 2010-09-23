@@ -20,7 +20,7 @@ require("fruit.lua")
 require("score.lua")
 
 -- ****************************************
---   Love
+--   Main
 -- ****************************************
 
 function love.load()
@@ -28,17 +28,40 @@ function love.load()
     love.graphics.setBackgroundColor(26, 19, 0)
     
     gfx = {}
-    gfx.image = love.graphics.newImage("snake.png")
+    gfx.image = love.graphics.newImage("images/snake.png")
     gfx.image:setFilter("nearest", "nearest")
     gfx.scale = 2
     gfx.tile = 16
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
+	
+	screen = {}
+	
+	screen.intro = love.graphics.newImage("images/intro.png")
+	screen.intro:setFilter("nearest", "nearest")
+	screen.pause = love.graphics.newImage("images/pause.png")
+	screen.pause:setFilter("nearest", "nearest")
+	screen.scores = love.graphics.newImage("images/highscores.png")
+	screen.scores:setFilter("nearest", "nearest")
+	screen.menu = love.graphics.newImage("images/menu.png")
+	screen.menu:setFilter("nearest", "nearest")
+	screen.gameover = love.graphics.newImage("images/gameover.png")
+	screen.gameover:setFilter("nearest", "nearest")
     
     font = {}
-    font = love.graphics.newImageFont("font.png", "1234567890, ")
+    font = love.graphics.newImageFont("images/font.png", "1234567890, ")
     love.graphics.setFont(font)
+	
+	keys = {}
+	keys.down = {} -- I didn't go with isDown, isHeld, isUp because love.keyboard already has an isDown module/field/table and it behaves differently/stupidly
+	keys.held = {}
+	keys.up = {}
+	
+	keysAdd("escape")
+	keysAdd("return")
+	keysAdd("q")
+	keysAdd("r")
 
     spr = {}
     spr.snake = gfx.sprites[1][1]
@@ -62,37 +85,100 @@ function love.load()
     view.w = (gfx.width / gfx.tile) / gfx.scale
     view.h = (gfx.height / gfx.tile) / gfx.scale
     view.pad = 8
-
-	initMap()
-    initScoreHandler()
-    initSnake()
-	initEnemy()
-    initFruit()
-    initHud()
+	
+	state = "game"
+	
+	stateInit()
 end
 
 function love.update(dt)
-    updateSnake(dt)
-	updateEnemy(dt)
-    updateView(dt)
-end
-
-function love.draw()
-	drawMap()
-	drawShadows()
-    drawSnake(snake)
-    drawSnake(enemy)
-    drawFruit()
-    -- drawHud()
-end
-
-function love.keypressed(key)
-    if key == "escape" or key == "q" then
-        gameQuit()
-    elseif key == "r" then
+	stateUpdate(dt)
+	if key == "r" then
         love.filesystem.load("main.lua")()
         love.load()
     end
+	keysUpdate()
+end
+
+function love.draw()
+	stateDraw()
+end
+
+-- ****************************************
+--   State
+-- ****************************************
+
+function stateInit()
+	-- Init Game
+	if state == "game" then
+		initMap()
+		initScoreHandler()
+		initSnake()
+		initEnemy()
+		initFruit()
+		initHud()
+	end
+	
+end
+
+function stateUpdate(dt)
+	-- Update Game
+	if state == "game" then
+		updateSnake(dt)
+		updateEnemy(dt)
+		updateView(dt)
+		if keys.down["escape"] then
+			state = "pause"
+		end
+	
+	-- Update Pause
+	elseif state == "pause" then
+		if keys.down["escape"] then
+			state = "game"
+		end
+	end
+	
+end
+
+function stateDraw()
+	-- Draw Game
+	if state == "game" then
+		drawMap()
+		drawShadows()
+		drawSnake(snake)
+		drawSnake(enemy)
+		drawFruit()
+		
+	-- Draw Pause
+	elseif state == "pause" then
+		drawImage(screen.pause, 0, 0, "center")
+	end
+	
+end
+
+-- ****************************************
+--   Keys/Input
+-- ****************************************
+
+function love.keypressed(key)
+	keys.down[key] = true
+	keys.held[key] = true
+end
+
+function love.keyreleased(key)
+	keys.held[key] = false
+	keys.up[key] = true
+end
+
+function keysAdd(key)
+	keys.down[key] = false
+	keys.held[key] = false
+	keys.up[key] = false
+end
+
+function keysUpdate(dt)
+	for k, v in pairs(keys.down) do keys.down[k] = false end
+	for k, v in pairs(keys.up) do keys.up[k] = false end
 end
 
 -- ****************************************
@@ -115,6 +201,7 @@ end
 function gameQuit()
     love.event.push("q")    
 end
+
 
 -- ****************************************
 --  Helpers
@@ -144,4 +231,15 @@ function spriteSheet(img,tile)
     end
 
     return t
+end
+
+function drawImage(img,x,y,str)
+	if str == "center" then
+		x = gfx.width / 2
+		y = gfx.height / 2
+		x = x - (img:getWidth() / 2)
+		y = y - (img:getHeight() / 2)
+	end
+	
+	love.graphics.draw(img, x, y)
 end
