@@ -6,8 +6,8 @@
 --
 -- ==================================================
 
-require("map01.lua")
-require("map02.lua")
+require("maps/map01.lua")
+require("maps/map02.lua")
 
 -- ****************************************
 --   Map
