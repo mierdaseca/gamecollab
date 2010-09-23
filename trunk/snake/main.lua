@@ -29,9 +29,9 @@ function love.load()
     love.graphics.setBackgroundColor(26, 19, 0)
     
     gfx = {}
-    gfx.image = loadImage("snake", "images/snake.png")
     gfx.scale = 2
     gfx.tile = 16
+	gfx.image = loadImage("snake", "images/snake.png")
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
@@ -76,11 +76,10 @@ function love.load()
     spr.block = gfx.sprites[4][4]	
 
     view = {}
-    view.x = -4
+    view.x = 0
     view.y = 0
-    view.w = (gfx.width / gfx.tile) / gfx.scale
-    view.h = (gfx.height / gfx.tile) / gfx.scale
-    view.pad = 8
+    view.w = 256
+    view.h = 192
 	
 	map = map01
 	
@@ -212,6 +211,38 @@ function stateDraw()
 end
 
 -- ****************************************
+--   Game
+-- ****************************************
+
+function updateView(dt)
+    local s = snake
+    local v = view
+    if s.x * gfx.tile * gfx.scale < v.x + v.w then v.x = v.x - gfx.scale end
+    if s.y * gfx.tile * gfx.scale < v.y + v.h then v.y = v.y - gfx.scale end
+	if s.x * gfx.tile * gfx.scale > v.x + gfx.width - v.w then v.x = v.x + gfx.scale end
+    if s.y * gfx.tile * gfx.scale > v.y + gfx.height - v.h then v.y = v.y + gfx.scale end
+	--[[
+    if s.x * gfx.tile - v.pad > v.x + v.w then v.x = v.x + gfx.scale end
+    if s.y * gfx.tile - v.pad > v.y + v.h then v.y = v.y + gfx.scale end
+	]]--
+end
+
+function gameDie()
+	lives = lives - 1
+	
+	if lives == 0 then
+		state = "gameover"
+	else
+		state = "dead"
+	end
+end
+
+function gameQuit()
+    love.event.push("q")    
+end
+
+
+-- ****************************************
 --   Keys/Input
 --
 --     Index with "any" to see if a key
@@ -245,31 +276,4 @@ function keysUpdate(dt)
 	for k, v in pairs(keys.up) do keys.up[k] = false end
 	keys.down["any"] = false
 	keys.up["any"] = false
-end
-
--- ****************************************
---   Game
--- ****************************************
-
-function updateView(dt)
-    local s = snake
-    local v = view
-    while s.x < v.x + v.pad do v.x = v.x - 1 end
-    while s.y < v.y + v.pad do v.y = v.y - 1 end
-    while s.x > v.x + v.w - v.pad do v.x = v.x + 1 end
-    while s.y > v.y + v.h - v.pad do v.y = v.y + 1 end
-end
-
-function gameDie()
-	lives = lives - 1
-	
-	if lives == 0 then
-		state = "gameover"
-	else
-		state = "dead"
-	end
-end
-
-function gameQuit()
-    love.event.push("q")    
 end
