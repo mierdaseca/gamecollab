@@ -47,15 +47,35 @@ function drawImage(img,x,y,str)
 	love.graphics.draw(img, x, y)
 end
 
-images = {}
+function drawBumper(b,x,y,str)	
+	if str == "middle" then
+		love.graphics.drawq(b.img, b.quad, x-b.w*.5, y, 0.0, gfx.scale, gfx.scale)
+	elseif str == "center" then
+		love.graphics.drawq(b.img, b.quad, x-b.w*.5, y-b.h*0.5, 0.0, gfx.scale, gfx.scale)
+	elseif str == "left" then
+		love.graphics.drawq(b.img, b.quad, x, y, 0.0, gfx.scale, gfx.scale)
+	elseif str == "right" then
+		love.graphics.drawq(b.img, b.quad, x-b.w, y, 0.0, gfx.scale, gfx.scale)
+	end
+end
 
-function loadImage(name,file)
+function loadImage(file)
 	local img = love.graphics.newImage(file)
 	img:setFilter("nearest", "nearest")
-	images[name] = img
 	return img
 end
 
-function getImage(name)
-	return images[name]
+function loadBumper(img,x,y,w,h)
+	local bx, by, bw, bh
+	bx = x * gfx.tile
+	by = y * gfx.tile
+	bw = math.ceil(w) * gfx.tile
+	bh = math.ceil(h) * gfx.tile
+	
+	local b = {}
+	b.img = img
+	b.quad = love.graphics.newQuad(bx, by, bw, bh, img:getWidth(), img:getHeight())
+	b.w = w * (gfx.tile * gfx.scale)
+	b.h = h * (gfx.tile * gfx.scale)
+	return b
 end

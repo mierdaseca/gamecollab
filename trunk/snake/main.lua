@@ -31,23 +31,28 @@ function love.load()
     gfx = {}
     gfx.scale = 2
     gfx.tile = 16
-	gfx.image = loadImage("snake", "images/snake.png")
+	gfx.image = loadImage("images/snake.png")
     gfx.sprites = spriteSheet(gfx.image, gfx.tile)
     gfx.width = love.graphics.getWidth()
     gfx.height = love.graphics.getHeight()
 	
+	gfx.paused = loadBumper(gfx.image, 5, 12, 3.25, 0.80)
+	gfx.score = loadBumper(gfx.image, 5, 9, 2.35, 0.80)
+	gfx.level = loadBumper(gfx.image, 5, 10, 2.35, 0.80)	
+	gfx.lives = loadBumper(gfx.image, 8, 9, 2.00, 1.05)
+	
 	screen = {}
 	
-	screen.intro = loadImage("intro", "images/intro.png")
-	screen.pause = loadImage("pause", "images/pause.png")
-	screen.scores = loadImage("scores", "images/highscores.png")
-	screen.menu = loadImage("menu", "images/menu.png")
-	screen.dead = loadImage("dead", "images/dead.png")
-	screen.gameover = loadImage("gameover", "images/gameover.png")
-	screen.three = loadImage("three", "images/three.png")
-	screen.two = loadImage("two", "images/two.png")
-	screen.one = loadImage("one", "images/one.png")
-
+	screen.intro = loadImage("images/intro.png")
+	screen.pause = loadImage("images/pause.png")
+	screen.scores = loadImage("images/highscores.png")
+	screen.menu = loadImage("images/menu.png")
+	screen.dead = loadImage("images/dead.png")
+	screen.gameover = loadImage("images/gameover.png")
+	screen.three = loadImage("images/three.png")
+	screen.two = loadImage("images/two.png")
+	screen.one = loadImage("images/one.png")
+	
     font = {}
     font = love.graphics.newImageFont("images/font.png", "1234567890, ")
     love.graphics.setFont(font)
@@ -89,6 +94,8 @@ function love.load()
 	game.time = 0.0
 	
     view = {}
+	view.rate = 0.0078125
+	view.time = 0.0
     view.x = 0
     view.y = 0
     view.w = 256
@@ -151,7 +158,6 @@ function stateUpdate(dt)
 	
 	-- Update Game
 	elseif state == "game" then
-		
 		if game.time > 3.00 then
 			updateSnake(dt)
 			updateEnemy(dt)
@@ -159,7 +165,6 @@ function stateUpdate(dt)
 		else
 			game.time = game.time + dt
 		end
-		
 		if keys.down["escape"] then
 			state = "pause"
 		end
@@ -214,12 +219,25 @@ function stateDraw()
 		
 		if game.time < 1.00 then drawImage(screen.three, 0, 0, "center")
 		elseif game.time < 2.00 then drawImage(screen.two, 0, 0, "center")
-		elseif game.time < 3.00 then drawImage(screen.one, 0, 0, "center") end
+		elseif game.time < 3.00 then drawImage(screen.one, 0, 0, "center") else
+			
+			drawBumper(gfx.lives, 24, 16, "left")
+			drawBumper(gfx.level, gfx.width / 2, 16, "middle")
+			drawBumper(gfx.score, gfx.width - 24, 16, "right")
+			
+		end
 		
 	-- Draw Pause
 	elseif state == "pause" then
-		drawImage(screen.pause, 0, 0, "center")
+		-- drawImage(screen.pause, 0, 0, "center")
+		drawMap()
+		drawShadows()
+		drawSnake(snake)
+		drawSnake(enemy)
+		drawFruit()
 		
+		drawBumper(gfx.paused, gfx.width/2, gfx.height/2, "center")
+			
 	-- Draw Dead
 	elseif state == "dead" then
 		drawImage(screen.dead, 0, 0, "center")
@@ -242,10 +260,14 @@ end
 function updateView(dt)
     local s = snake
     local v = view
-    if s.x * gfx.tile * gfx.scale < v.x + v.w then v.x = v.x - gfx.scale end
-    if s.y * gfx.tile * gfx.scale < v.y + v.h then v.y = v.y - gfx.scale end
-	if s.x * gfx.tile * gfx.scale > v.x + gfx.width - v.w then v.x = v.x + gfx.scale end
-    if s.y * gfx.tile * gfx.scale > v.y + gfx.height - v.h then v.y = v.y + gfx.scale end
+	if v.time > view.rate then
+		if s.x * gfx.tile * gfx.scale < v.x + v.w then v.x = v.x - 1 v.time = 0.0 end
+		if s.y * gfx.tile * gfx.scale < v.y + v.h then v.y = v.y - 1 v.time = 0.0 end
+		if s.x * gfx.tile * gfx.scale > v.x + gfx.width - v.w then v.x = v.x + 1 v.time = 0.0 end
+		if s.y * gfx.tile * gfx.scale > v.y + gfx.height - v.h then v.y = v.y + 1 v.time = 0.0 end
+	else
+		v.time = v.time + dt
+	end
 end
 
 function gameDie()
